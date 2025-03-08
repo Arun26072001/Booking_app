@@ -1,3 +1,4 @@
-/node_modules
-/picker/.env
-/bookingApp_backend/config/config.env
+node_modules/
+bookingApp_backend/node_modules/
+picker/.env
+bookingApp_backend/config/config.env
