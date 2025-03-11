@@ -6,7 +6,6 @@ const vehicle = require("./routers/vehicle");
 const allotment = require("./routers/allotment");
 const completeTrip = require("./routers/trip-complete");
 const state = require("./routers/state");
-const { verifyAdmin } = require("./middleware/authorization");
 const { imgUpload } = require("./controllers/ImgUpload");
 
 const app = express();
