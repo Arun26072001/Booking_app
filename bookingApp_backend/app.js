@@ -13,7 +13,9 @@ const app = express();
 // Middleware
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON payloads
-
+app.use("/", (req, res)=>{
+    return res.send("api working")
+})
 // Routers
 app.use("/api/auth", auth);
 app.use("/api/booking", booking);
