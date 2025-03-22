@@ -8,7 +8,7 @@ const port  = process.env.PORT;
 DBConncetion();
 
 const server = app.listen(port, ()=>{
-    console.log(`${process.env.NODE_ENV}  is running on ${port}`);
+    console.log(`${process.env.NODE_ENV} is running on ${port}`);
 })
 
 process.on("unhandledRejection", (err)=>{

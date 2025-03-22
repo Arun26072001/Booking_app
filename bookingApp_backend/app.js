@@ -13,9 +13,16 @@ const app = express();
 // Middleware
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON payloads
-app.use("/", (req, res)=>{
-    return res.send("api working")
-})
+// API Endpoints
+app.get("/", (req, res) => {
+    require("dns").resolve("www.google.com", function (err) {
+        if (err) {
+            res.status(1024).send("Network not Connected!");
+        } else {
+            res.send({ message: "API and Network connected!" });
+        }
+    });
+});
 // Routers
 app.use("/api/auth", auth);
 app.use("/api/booking", booking);
