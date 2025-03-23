@@ -12,7 +12,6 @@ const bookingSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
     },
-    // tripPlan: { type: String },
     bookingOfficer: { type: mongoose.Schema.Types.ObjectId, ref: "employee" },
     vehicleType: { type: mongoose.Schema.Types.ObjectId, ref: "vehicle" },
     pickupDateTime: { type: String },

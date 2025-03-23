@@ -42,16 +42,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {data?.account && ["1", "3"].includes(data.account) && (
-        <Tabs.Screen
-          name="Allotment"
-          options={{
-            title: "Allotment",
-            tabBarIcon: ({ color }) => <MaterialIcons name="taxi-alert" size={24} color={color} />,
-          }}
-        />
-      )}
-
       {data?.account && ["1", "2"].includes(data.account) && (
         <Tabs.Screen
           name="Booking"
@@ -68,36 +58,6 @@ export default function TabsLayout() {
           options={{
             title: "Customers",
             tabBarIcon: ({ color }) => <FontAwesome6 name="users" size={24} color={color} />,
-          }}
-        />
-      )}
-
-      {data?.account && ["1", "2"].includes(data.account) && (
-        <Tabs.Screen
-          name="Register"
-          options={{
-            title: "Register",
-            tabBarIcon: ({ color }) => <Entypo name="add-user" size={24} color={color} />,
-          }}
-        />
-      )}
-
-      {data?.account && ["1"].includes(data.account) ? (
-        <Tabs.Screen
-          name="Vehicle"
-          options={{
-            title: "Vehicle",
-            tabBarIcon: ({ color }) => <FontAwesome6 name="taxi" size={24} color={color} />,
-          }}
-        />
-      ) : null}
-
-      {data?.account && ["1", "4"].includes(data.account) && (
-        <Tabs.Screen
-          name="TripCompleted"
-          options={{
-            title: "Trip Completed",
-            tabBarIcon: ({ color }) => <AntDesign name="checkcircle" size={24} color={color} />,
           }}
         />
       )}

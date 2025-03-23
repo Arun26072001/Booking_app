@@ -111,7 +111,7 @@ export default function Home() {
 
     function updateTripCompleted(booking) {
         if (account === "1") {
-            router.push({ pathname: "/TripCompleted", params: booking })
+            router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted }})
         } else {
             const isAlloted = allotments.find((allot) => allot.bookingId === booking._id);
             if (isAlloted) {
@@ -127,7 +127,7 @@ export default function Home() {
         if (booking.tripCompleted) {
             if (account === "1") {
                 // Navigate if account is "1" and trip is completed
-                router.push({ pathname: "/TripCompleted", params: booking })
+                router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted }})
             } else {
                 // Show toast if trip is already completed
                 Toast.show({
@@ -137,7 +137,7 @@ export default function Home() {
             }
         } else if (["1", "3", "4"].includes(account)) {
             // Navigate for accounts "1", "3", or "4" if the trip is not completed
-            router.push({ pathname: "/TripCompleted", params: booking })
+            router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted }})
         }
     };
 

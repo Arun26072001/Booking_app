@@ -1,18 +1,19 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, Heading, VStack, FormControl, Input, Button, Center, ScrollView } from "native-base";
+import { Box, Heading, VStack, FormControl, Input, Button, Center, ScrollView, Spinner } from "native-base";
 import { StyleSheet } from "react-native";
-import {EssentialValues} from "./_layout";
+import { EssentialValues } from "./_layout";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = () => {
-  const { loginUser } = useContext(EssentialValues);
+  const { loginUser, isLoading } = useContext(EssentialValues);
   const router = useRouter();
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
   });
 
+  //add credentials in loginData obj
   function updateLoginData(value, name) {
     setLoginData((prev) => ({
       ...prev,
@@ -20,11 +21,23 @@ const Login = () => {
     }));
   }
 
+
   useEffect(() => {
+    // to redirect, if user is already loggedIn
     const performLogin = async () => {
       const token = await AsyncStorage.getItem("token") || "";
+      const account = await AsyncStorage.getItem("account") || "";
       if (token) {
-        router.replace("/Home");
+        if (account == 2) {
+          router.replace("/(tabs_1)/Home");
+        } else if (account == 3) {
+          router.replace("/(tabs_2)/Home");
+        } else if (account == 4) {
+          router.replace("/(tabs_3)/Home");
+        }
+        else {
+          router.replace("/(tabs)/Home");
+        }
       }
     };
     performLogin();
@@ -50,8 +63,8 @@ const Login = () => {
               <FormControl.Label>Password</FormControl.Label>
               <Input type="password" value={loginData.password} onChangeText={(value) => updateLoginData(value, 'password')} />
             </FormControl>
-            <Button mt="2" colorScheme="indigo" onPress={() => loginUser(loginData, router)}>
-              Login
+            <Button mt="2" colorScheme="indigo" onPress={() => loginUser(loginData)}>
+              {isLoading ? <Spinner color={"white"} /> : "Login"}
             </Button>
           </VStack>
         </Box>

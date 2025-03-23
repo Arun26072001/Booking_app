@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, Button } from "react-native";
-import { Center, Box, Heading, VStack, FormControl, Input, Link, HStack } from "native-base";
+import { ScrollView, StyleSheet, Text } from "react-native";
+import { Button, Box, Heading, VStack, FormControl, Input, Link, HStack, Spinner } from "native-base";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { API_BASEURL } from "@env";
@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 export default function Register() {
     const router = useRouter();
     const [token, setToken] = useState("");
+    const [isWorkingApi, setIsWorkingApi] = useState(false);
     const [registerData, setRegisterData] = useState({
         name: "",
         email: "",
@@ -28,6 +29,7 @@ export default function Register() {
     }
 
     async function addEmployee() {
+        setIsWorkingApi(true);
         try {
             const addEmp = await axios.post(`${API_BASEURL}/api/auth`, registerData, {
                 headers: {
@@ -47,7 +49,7 @@ export default function Register() {
                 work: "",
                 contact: "",
             });
-            router.push("/home");
+            router.push("/Home");
         } catch (error) {
             Toast.show({
                 type: "error",
@@ -55,6 +57,7 @@ export default function Register() {
                 text2: error?.response?.data?.error
             });
         }
+        setIsWorkingApi(false);
     }
 
     useEffect(() => {
@@ -116,7 +119,9 @@ export default function Register() {
                             onChangeText={(value) => updateRegisterData(value, "password")}
                         />
                     </FormControl>
-                    <Button mt="5" p="3" colorScheme="indigo" onPress={addEmployee} title="Add Employee" />
+                    <Button mt="5" p="3" colorScheme="indigo" onPress={addEmployee} >
+                        {isWorkingApi ? <Spinner color={"white"} /> : "Add Employee"}
+                    </Button>
                 </VStack>
             </Box>
         </ScrollView>

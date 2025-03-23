@@ -6,7 +6,6 @@ const completeTripToDriver = async (req, res) => {
     try {
         const { id } = req.params; // Extract the booking ID from params
         const { tripDoc, startingKm, closingKm, receivedAmount } = req.body;
-        console.log(req.body.tripDoc);
 
         // Validate booking existence
         const booking = await Booking.findById(id);
@@ -18,21 +17,25 @@ const completeTripToDriver = async (req, res) => {
         const existingTrip = await TripComplete.findOne({ bookingId: id });
 
         if (existingTrip) {
-            console.log(existingTrip);
             // Limit tripDoc array size to 3
             if (existingTrip.tripDoc && existingTrip.tripDoc.length >= 3) {
                 return res.status(400).send({ error: "Trip already updated with maximum documents!" });
             }
 
             // Update existing TripComplete document
-            existingTrip.tripDoc.push(...tripDoc);
+            if (tripDoc) {
+                existingTrip.tripDoc.push(...tripDoc);
+            }
             existingTrip.startingKm = startingKm || existingTrip.startingKm || 0;
             existingTrip.closingKm = closingKm || existingTrip.closingKm || 0;
             existingTrip.receivedAmount = receivedAmount || existingTrip.receivedAmount || 0;
+
             await existingTrip.save();
 
             // Update booking details
-            if (startingKm && closingKm) {
+            if (![0, undefined, ""].includes(startingKm) && ![0, undefined, ""].includes(closingKm)) {
+                console.log(startingKm, closingKm);
+
                 booking.tripCompleted = true;
                 await booking.save();
             }
@@ -57,15 +60,19 @@ const completeTripToDriver = async (req, res) => {
             return res.status(201).send({ message: "Trip completed and image uploaded successfully!" });
         }
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
         return res.status(500).send({ error: error.message });
     }
 };
 
 const getCompletedTripDetails = async (req, res) => {
     try {
-        const completedTrip = await TripComplete.findOne({ bookingId: req.params.id }).exec();
+        let completedTrip = await TripComplete.findOne({ bookingId: req.params.id }).exec();
         if (completedTrip._id) {
+            completedTrip = {
+                ...completedTrip.toObject(),
+                tripDoc: completedTrip.tripDoc.filter((file) => file !== "")
+            }
             res.send(completedTrip)
         } else {
             res.status(404).send({ error: "Starting and closing Km not updated in this booking!" })

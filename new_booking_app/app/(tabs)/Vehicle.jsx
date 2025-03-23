@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { ScrollView, StyleSheet, Button } from "react-native";
-import { Center, Box, Heading, VStack, FormControl, Input } from "native-base";
+import { ScrollView, StyleSheet } from "react-native";
+import { Box, Heading, VStack, FormControl, Input, Button, Spinner } from "native-base";
 import axios from 'axios';
 import { EssentialValues } from "../_layout";
 import Toast from 'react-native-toast-message';
@@ -11,12 +11,8 @@ export default function Vehicle() {
     const router = useRouter();
     const { data } = useContext(EssentialValues);
     const { token } = data;
-    const [vehicle, setVehicle] = useState({
-        name: "",
-        perKm: "",
-        perDay: "",
-        capacity: ""
-    });
+    const [vehicle, setVehicle] = useState({});
+    const [isWorkingApi, setIsWorkingApi] = useState(false);
 
     function addVehicleObj(value, name) {
         setVehicle((pre) => ({
@@ -26,6 +22,7 @@ export default function Vehicle() {
     }
 
     async function addVehicle() {
+        setIsWorkingApi(true);
         try {
             const addVehicle = await axios.post(`${API_BASEURL}/api/vehicle`, vehicle,
                 {
@@ -39,26 +36,17 @@ export default function Vehicle() {
                 text1: "Success",
                 text2: addVehicle.data.message
             });
-            setVehicle({
-                name: "",
-                perKm: "",
-                perDay: "",
-                capacity: ""
-            });
-            router.push("/home");
+            setVehicle({});
+            router.push("/Home");
         } catch (error) {
             Toast.show({
                 type: "error",
                 text1: "Failed",
                 text2: error.response.data.error
             });
-            setVehicle({
-                name: "",
-                perKm: "",
-                perDay: "",
-                capacity: ""
-            });
+            setVehicle({});
         }
+        setIsWorkingApi(false);
     }
 
     return (
@@ -71,7 +59,7 @@ export default function Vehicle() {
                     <FormControl>
                         <FormControl.Label>Vehicle Name</FormControl.Label>
                         <Input
-                            value={vehicle.name}
+                            value={vehicle?.name}
                             onChangeText={(value) => addVehicleObj(value, "name")}
                         />
                     </FormControl>
@@ -79,7 +67,7 @@ export default function Vehicle() {
                         <FormControl.Label>Vehicle Per/Km</FormControl.Label>
                         <Input
                             keyboardType='numeric'
-                            value={vehicle.perKm}
+                            value={vehicle?.perKm}
                             onChangeText={(value) => addVehicleObj(value, "perKm")}
                         />
                     </FormControl>
@@ -87,7 +75,7 @@ export default function Vehicle() {
                         <FormControl.Label>Vehicle Per/Day</FormControl.Label>
                         <Input
                             keyboardType='numeric'
-                            value={vehicle.perDay}
+                            value={vehicle?.perDay}
                             onChangeText={(value) => addVehicleObj(value, "perDay")}
                         />
                     </FormControl>
@@ -95,11 +83,20 @@ export default function Vehicle() {
                         <FormControl.Label>Vehicle Capacity</FormControl.Label>
                         <Input
                             keyboardType='numeric'
-                            value={vehicle.capacity}
+                            value={vehicle?.capacity}
                             onChangeText={(value) => addVehicleObj(value, "capacity")}
                         />
                     </FormControl>
-                    <Button mt="5" p="3" colorScheme="indigo" onPress={addVehicle} title="Add Vehicle" />
+                    <FormControl>
+                        <FormControl.Label>Vehicle Number</FormControl.Label>
+                        <Input
+                            value={vehicle?.vehicleNo}
+                            onChangeText={(value) => addVehicleObj(value, "vehicleNo")}
+                        />
+                    </FormControl>
+                    <Button onPress={addVehicle}>
+                        {isWorkingApi ? <Spinner color={"white"} /> : "Add Vehicle"}
+                    </Button>
                 </VStack>
             </Box>
         </ScrollView>

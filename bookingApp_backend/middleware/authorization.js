@@ -46,6 +46,7 @@ function verifyAdminBooker(req, res, next) {
 }
 
 function verifyDriverAllotorAdmin(req, res, next) {
+
     if (req.headers['authorization'] !== undefined) {
         const token = req.headers['authorization'];
 

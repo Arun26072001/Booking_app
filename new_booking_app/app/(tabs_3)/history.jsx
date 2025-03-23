@@ -145,7 +145,7 @@ export default function BookingHistory() {
                                         <Text style={[styles.pickupNdDropText, { paddingVertical: 2 }]}>Remaining Price</Text>
                                         <Text style={{ fontWeight: "bold" }}>₹{" " + booking.totalPayment - booking.advancePayment}</Text>
                                         <Text style={[styles.pickupNdDropText, { fontSize: 13 }]}>Toll Permit Extra</Text>
-                                        <View style={[styles.bookingDetails, { justifyContent: "start", gap: 10 }]}>
+                                        {/* <View style={[styles.bookingDetails, { justifyContent: "start", gap: 10 }]}>
                                             <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => (account === "1" || account === "3") && navigation.navigate("allotment", { id: booking._id })} title="Alloment">
                                                 <Image style={{ width: 18, height: 18 }} source={require("../../assets/images/booking.png")} />
                                             </View>
@@ -169,7 +169,7 @@ export default function BookingHistory() {
                                                     </Text>
                                                 </View>
                                             }
-                                        </View>
+                                        </View> */}
                                     </View>
                                 </View>
                             </View>

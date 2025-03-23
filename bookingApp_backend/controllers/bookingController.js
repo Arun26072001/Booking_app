@@ -67,9 +67,12 @@ async function getAllBookings(req, res) {
                 path: "vehicle"
             }]
         }).populate({ path: "vehicleType" });
-        bookings = bookings.sort((a, b) => b.pickupDateTime - a.pickupDateTime)
+        bookings = bookings.sort((a, b) => new Date(b.pickupDateTime) - new Date(a.pickupDateTime))
+
         res.send(bookings);
     } catch (error) {
+        console.log(error);
+
         res.status(500).send({ error: error.message })
     }
 }
@@ -170,12 +173,13 @@ async function getAllotorTrips(req, res) {
         let driverTrips = await Booking.find()
             .populate({
                 path: "allotment",
-                match: { allotmentOfficer: { $in: req.params.id } }
+                // match: { allotmentOfficer: { $in: req.params.id } }
             })
             .populate({ path: "vehicleType" })
             .exec();
+            
         if (driverTrips.length > 0) {
-            driverTrips = driverTrips.sort((a, b) => b.pickupDateTime - a.pickupDateTime)
+            driverTrips = driverTrips.sort((a, b) => new Date(b.pickupDateTime) - new Date(a.pickupDateTime))
             return res.send(driverTrips);
         } else {
             return res.status(404).send({ error: "Sorry, No Trips assign for you!" })
@@ -188,51 +192,47 @@ async function getAllotorTrips(req, res) {
 async function updateBooking(req, res) {
     try {
         let { allotment, vehicleInTrip } = req.body;
-        allotment = {
-            bookingId: allotment.bookingId,
-            allotmentOfficer: allotment.allotmentOfficer,
-            driver: allotment.driver,
-            vehicle: allotment.vehicle
-        }
-        vehicleInTrip = {
-            bookingId: vehicleInTrip.bookingId,
-            startingKm: vehicleInTrip.startingKm,
-            closingKm: vehicleInTrip.closingKm,
-            receivedAmount: vehicleInTrip.receivedAmount,
-            tripDoc: vehicleInTrip.tripDoc
-        }
+        let updatedAllotment, updatedTripComplete;
+        if (allotment?._id) {
+            allotment = {
+                bookingId: allotment.bookingId,
+                allotmentOfficer: allotment.allotmentOfficer,
+                driver: allotment.driver,
+                vehicle: allotment.vehicle
+            }
 
-        // Validate Allotment Data
-        const { error: allotmentError } = allotmentValidation.validate(allotment);
-        if (allotmentError) {
-            return res.status(400).send({ error: allotmentError.details[0].message });
-        }
+            // Validate Allotment Data
+            const { error: allotmentError } = allotmentValidation.validate(allotment);
+            if (allotmentError) {
+                return res.status(400).send({ error: allotmentError.details[0].message });
+            }
 
-        // Validate TripComplete Data
-        const { error: tripCompleteError } = TripCompleteValidation.validate(vehicleInTrip);
-        if (tripCompleteError) {
-            return res.status(400).send({ error: tripCompleteError.details[0].message });
+            updatedAllotment = await Allotment.findByIdAndUpdate(
+                allotment._id,
+                allotment,
+                { new: true }
+            );
         }
-
-        // Update Allotment
-        if (!allotment._id) {
-            return res.status(400).send({ error: "Allotment ID is required for updating." });
+        if (vehicleInTrip?._id) {
+            vehicleInTrip = {
+                bookingId: vehicleInTrip.bookingId,
+                startingKm: vehicleInTrip.startingKm,
+                closingKm: vehicleInTrip.closingKm,
+                receivedAmount: vehicleInTrip.receivedAmount,
+                tripDoc: vehicleInTrip.tripDoc
+            }
+            // Validate TripComplete Data
+            const { error: tripCompleteError } = TripCompleteValidation.validate(vehicleInTrip);
+            if (tripCompleteError) {
+                return res.status(400).send({ error: tripCompleteError.details[0].message });
+            }
+            // Update TripComplete
+            updatedTripComplete = await TripComplete.findByIdAndUpdate(
+                vehicleInTrip._id,
+                vehicleInTrip,
+                { new: true }
+            );
         }
-        const updatedAllotment = await Allotment.findByIdAndUpdate(
-            allotment._id,
-            allotment,
-            { new: true }
-        );
-
-        // Update TripComplete
-        if (!vehicleInTrip._id) {
-            return res.status(400).send({ error: "TripComplete ID is required for updating." });
-        }
-        const updatedTripComplete = await TripComplete.findByIdAndUpdate(
-            vehicleInTrip._id,
-            vehicleInTrip,
-            { new: true }
-        );
 
         // Update Booking
         const updatedBooking = await Booking.findByIdAndUpdate(
@@ -240,11 +240,6 @@ async function updateBooking(req, res) {
             req.body,
             { new: true }
         );
-
-        // Check if booking was updated
-        if (!updatedBooking) {
-            return res.status(404).send({ error: "No booking data found!" });
-        }
 
         // Success Response
         return res.send({

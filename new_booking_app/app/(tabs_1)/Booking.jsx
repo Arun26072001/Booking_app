@@ -412,18 +412,18 @@ export default function Booking() {
 
                             <FormControl>
                                 <FormControl.Label>Total Km</FormControl.Label>
-                                <Input size={"xl"} keyboardType='numeric' value={String(bookingObj?.totalKm)} style={[styles.input, { borderWidth: 0 }]} onChangeText={(value) => fillBookingForm(value, "totalKm")} />
+                                <Input size={"xl"} keyboardType='numeric' value={String(bookingObj?.totalKm) || ""} style={[styles.input, { borderWidth: 0 }]} onChangeText={(value) => fillBookingForm(value, "totalKm")} />
                             </FormControl>
                             <FormControl>
                                 <FormControl.Label>Total Payment</FormControl.Label>
-                                <Input size={"xl"} keyboardType='numeric' value={String(bookingObj?.totalPayment)} style={[styles.input, { borderWidth: 0 }]} onChangeText={(value) => fillBookingForm(value, "totalPayment")} />
+                                <Input size={"xl"} keyboardType='numeric' value={String(bookingObj?.totalPayment) || ""} style={[styles.input, { borderWidth: 0 }]} onChangeText={(value) => fillBookingForm(value, "totalPayment")} />
                             </FormControl>
                             <FormControl>
                                 <FormControl.Label>Advance Payment</FormControl.Label>
                                 <Input
                                     size={"xl"}
                                     keyboardType='numeric'
-                                    value={String(bookingObj?.advancePayment)} style={[styles.input, { borderWidth: 0 }]}
+                                    value={String(bookingObj?.advancePayment) || ""} style={[styles.input, { borderWidth: 0 }]}
                                     onChangeText={(value) => fillBookingForm(value, "advancePayment")} />
                             </FormControl>
                             {

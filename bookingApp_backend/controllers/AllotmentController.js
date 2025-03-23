@@ -2,14 +2,17 @@ const { allotmentValidation, Allotment } = require("../models/AllotmentModel");
 const { Booking } = require("../models/BookingModel");
 const nodemailer = require("nodemailer");
 const { Vehicle } = require("../models/VehicleModel");
+const { Employee } = require("../models/UserModel");
 
 async function addAllotment(req, res) {
     try {
         const booking = await Booking.findById(req.params.id);
         const vehicle = await Vehicle.findById(req.body.vehicle);
+        const driver = await Employee.findById(req.body.driver);
         const { pickupLocation, destination, email } = booking;
-        const { driverName, driverContact } = req.body;
+        // const { driverName, driverContact } = req.body;
         const newAllotment = { ...req.body, bookingId: req.params.id }
+        
         const validation = allotmentValidation.validate(newAllotment);
         const { error } = validation;
         if (error) {
@@ -81,10 +84,10 @@ async function addAllotment(req, res) {
                                     <div class="container">
                                         <div class="content">
                                             <h4>Driver and Vehicle Details</h4>
-                                            <p>Driver Name: <b>${driverName}</b></p>
-                                            <p>Driver Contact: <a href="tel:+91${driverContact}"><b>${driverContact}</b></a></p>
-                                            <p>Vehicle Name: <b>${vehicleName}</b></p>
-                                            <p>Vehicle Number: <b>${vehicleNumber}</b></p>
+                                            <p>Driver Name: <b>${driver.name}</b></p>
+                                            <p>Driver Contact: <a href="tel:+91${driver.contact}"><b>${driver.contact}</b></a></p>
+                                            <p>Vehicle Name: <b>${vehicle.name}</b></p>
+                                            <p>Vehicle Number: <b>${vehicle.vehicleNo}</b></p>
                                         </div>
                                     </div>
                                 </body>
@@ -110,7 +113,10 @@ async function addAllotment(req, res) {
 
 async function getAllotments(req, res) {
     try {
-        const allotments = await Allotment.find({}).populate("driver").exec();
+        const allotments = await Allotment.find({})
+            .populate("driver")
+            .populate("vehicle")
+            .exec();
         res.send(allotments);
     } catch (error) {
         res.status(500).send({ error: error.message })
@@ -142,9 +148,10 @@ async function updateAllotment(req, res) {
         if (error) {
             return res.status(400).send({ error: error.details[0].message })
         } else {
+            const vehicleData = await Vehicle.findById(req.body.vehicle)
             const updateAllot = await Allotment.findOneAndUpdate({ bookingId: req.params.id }, updatedAllotment, { new: true })
             if (tripCompleted) {
-                return res.send({ message: `${updateAllot.vehicleName} has been allotment updated for ${pickupLocation} - ${destination} trip.` })
+                return res.send({ message: `${updateAllot.vehicleData.name} has been allotment updated for ${pickupLocation} - ${destination} trip.` })
             } else {
                 var transporter = nodemailer.createTransport({
                     service: 'gmail',
@@ -207,7 +214,7 @@ async function updateAllotment(req, res) {
                                             <p>Driver Name: <b>${updateAllot.driverName}</b></p>
                                             <p>Driver Contact: <a href="tel:+91${updateAllot.driverContact}"><b>${updateAllot.driverContact}</b></a></p>
                                             <p>Vehicle Name: <b>${updateAllot.vehicleName}</b></p>
-                                            <p>Vehicle Number: <b>${updateAllot.vehicleNumber}</b></p>
+                                            <p>Vehicle Number: <b>${updateAllot.vehicleNo}</b></p>
                                         </div>
                                     </div>
                                 </body>
@@ -221,7 +228,7 @@ async function updateAllotment(req, res) {
                         console.log('Email sent: ' + info.response);
                     }
                 });
-                return res.send({ message: `${updateAllot.vehicleName} has been allotment updated for ${pickupLocation} - ${destination} trip.` })
+                return res.send({ message: `${vehicleData.name} has been allotment updated for ${pickupLocation} - ${destination} trip.` })
             }
         }
     } catch (error) {

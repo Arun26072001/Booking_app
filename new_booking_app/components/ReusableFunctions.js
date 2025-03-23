@@ -1,26 +1,43 @@
 import Toast from "react-native-toast-message";
 import { API_BASEURL } from "@env";
-console.log(API_BASEURL);
 
 function warnMsg(type) {
     if (type === "call") {
         Toast.show({
             type: "error",
             text1: "Warning",
-            text2: "You can't make call, until allot the taxi for this trip"
-        })
+            text2: "You can't make a call until you allot the taxi for this trip"
+        });
     } else if (type === "share") {
         Toast.show({
             type: "error",
             text1: "Warning",
-            text2: "You can't share details, until allot the taxi for this trip"
-        })
-    } else if ("complete") {
+            text2: "You can't share details until you allot the taxi for this trip"
+        });
+    } else if (type === "complete") {
         Toast.show({
             type: "error",
             text1: "Warning",
-            text2: "You can't access trip-completed form, until allot the taxi for this trip"
-        })
+            text2: "You can't access the trip-completed form until you allot the taxi for this trip"
+        });
+    } else if (type === "starting km") {
+        Toast.show({
+            type: "error",
+            text1: "Warning",
+            text2: "You have already uploaded the starting Km image"
+        });
+    } else if (type === "closing km") {
+        Toast.show({
+            type: "error",
+            text1: "Warning",
+            text2: "First of all upload starting Km Image"
+        });
+    } else {
+        Toast.show({
+            type: "error",
+            text1: "Warning",
+            text2: "Invalid action type"
+        });
     }
 }
 

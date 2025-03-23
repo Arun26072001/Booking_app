@@ -6,8 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 export default function CommonModal({ customerData, isView, setIsView }) {
 
     const renderData = (data) => {
+
         return Object.entries(data).map(([key, value]) => {
-            if (key === "_id" || key === "__v") {
+            if (["_id", "__v", "bookingId"].includes(key)) {
                 return null
             }
             if (typeof value === "object" && value !== null) {
@@ -20,7 +21,7 @@ export default function CommonModal({ customerData, isView, setIsView }) {
             }
             return (
                 <View key={key} style={styles.tableRow}>
-                    <Text style={[styles.tableCell, { fontWeight: "bold" }]}>{key[0].toUpperCase() + key.slice(1)}</Text>
+                    <Text style={[styles.tableCell, { fontWeight: "bold", textAlign: "center" }]}>{key[0].toUpperCase() + key.slice(1)}</Text>
                     <Text style={styles.tableCell}>{value}</Text>
                 </View>
             );
@@ -42,7 +43,7 @@ export default function CommonModal({ customerData, isView, setIsView }) {
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <Text style={styles.tableTitle}>Customer Data</Text>
-                            <ScrollView>
+                            <ScrollView style={{ width: "100%" }}>
                                 <View style={styles.table}>
                                     <View style={styles.tableRowHeader}>
                                         <Text style={[styles.tableCell, styles.tableHeaderCell]}>Field</Text>
@@ -53,7 +54,7 @@ export default function CommonModal({ customerData, isView, setIsView }) {
                                 </View>
 
                             </ScrollView>
-                            <Button onPress={()=>setIsView(!isView)} style={{marginTop: 10}}>Close</Button>
+                            <Button onPress={() => setIsView(!isView)} style={{ marginTop: 10 }}>Close</Button>
                         </View>
                     </View>
                 </Modal>
@@ -68,6 +69,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.5)', // Add a dim background
+        // width: "100%"
     },
     modalView: {
         margin: 20,
@@ -88,13 +90,14 @@ const styles = StyleSheet.create({
     table: {
         borderWidth: 1,
         borderColor: '#ddd',
-        width: '100%',
+        width: '500px',
         marginTop: 10,
     },
     tableRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+        // width:"100%"
     },
     tableRowHeader: {
         flexDirection: 'row',
@@ -122,5 +125,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
         marginVertical: 5,
+        // textAlign: "center"
     },
 });

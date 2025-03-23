@@ -30,7 +30,11 @@ export default function Allotment() {
   const addAllotment = async () => {
     setIsWorkingApi(true);
     try {
-      const allot = await axios.post(`${API_BASEURL}/api/allotment/${bookingData._id}`, allotment);
+      const newAllotment = {
+        ...allotment,
+        allotmentOfficer: data._id
+      }
+      const allot = await axios.post(`${API_BASEURL}/api/allotment/${bookingData._id}`, newAllotment);
       Toast.show({ type: 'success', text1: allot?.data?.message });
       setAllotment({ allotmentOfficer: '', driver: '', vehicle: '' });
       updateBooking();
@@ -71,15 +75,15 @@ export default function Allotment() {
     }
   }
   async function fetchEmps() {
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
       const emps = await axios.get(`${API_BASEURL}/api/auth`);
       setDrivers(emps.data.filter((emp) => emp.account === 4));
-      setEmployees(emps.data);
+      setEmployees(emps.data.filter((emp)=>[1, 3].includes(emp.account)))
     } catch (error) {
       Toast.show({ type: 'error', text1: error.response.data.message });
     }
-    setIsLoading(false);
+    // setIsLoading(false);
   }
 
   useEffect(() => {
@@ -123,7 +127,7 @@ export default function Allotment() {
             <VStack space={3} mt="5">
               <FormControl>
                 <FormControl.Label>Allotment Officer</FormControl.Label>
-                <Picker selectedValue={allotment?.allotmentOfficer} onValueChange={(value) => fillAllotmentForm(value, 'allotmentOfficer')}>
+                <Picker selectedValue={allotment?.allotmentOfficer || data._id} onValueChange={(value) => fillAllotmentForm(value, 'allotmentOfficer')}>
                   <Picker.Item label="Select Allotment Office" />
                   {employees.map((emp) => (
                     <Picker.Item key={emp._id} label={emp.name} value={emp._id} />

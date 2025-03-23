@@ -1,8 +1,20 @@
-import { View, Text, Image, StyleSheet } from "react-native";
-import React from 'react'
+import { View, Text, Image, StyleSheet, Linking, Share, } from "react-native";
+import React, { useContext, useEffect, useState } from 'react'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { useRouter } from "expo-router";
+import * as ImagePicker from 'expo-image-picker';
+import { warnMsg } from "../ReusableFunctions";
+import { API_BASEURL } from "@env";
+import Toast from "react-native-toast-message";
+import axios from "axios";
+import { EssentialValues } from "@/app/_layout";
 
-export default function TripCard({ booking, takePhotoAndUpload, makeCallToDriver, shareData, account, navigation, updateTripCompleted }) {
+export default function TripCard({ booking, account, updateTripCompleted, allotments }) {
+    const { data } = useContext(EssentialValues);
+    const { token } = data;
+    const router = useRouter();
+    const { _id } = booking;
+    const [completedTripData, setCompletedTripData] = useState({});
 
     const dayMonthFormatter = new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
@@ -15,6 +27,115 @@ export default function TripCard({ booking, takePhotoAndUpload, makeCallToDriver
         minute: "2-digit",
         hour12: true,
     });
+
+    function handleAllotment(bookingData) {
+        if (["1", "3"].includes(account)) {
+            router.push({ pathname: `/(tabs${account === "3" ? "_2" : ""})/Allotment`, params: bookingData })
+        }
+    }
+
+    function makeCallToDriver(bookingId) {
+        const isAlloted = allotments.find((allot) => allot.bookingId === bookingId);
+        if (isAlloted) {
+            return Linking.openURL(`tel:+91${isAlloted.driver.contact}`)
+        } else {
+            return warnMsg("call")
+        }
+    }
+
+    function shareData(bookingId) {
+        const isAlloted = allotments.find((allot) => allot.bookingId === bookingId);
+        if (isAlloted) {
+            const { name, contact } = isAlloted.driver;
+            return Share.share({
+                message: `DriverName: ${name}\nDriverContact: ${contact}\nVehicleName: ${isAlloted.vehicle.name}\nVehicleNumber: ${isAlloted.vehicle.vehicleNo}`
+            })
+        } else {
+            return warnMsg("share");
+        }
+    }
+
+    async function takePhotoAndUpload(_id) {
+        // img upload
+        try {
+            const photo = await ImagePicker.launchCameraAsync({
+                mediaTypes: ["livePhotos", "images"],
+                quality: 0.6,
+                allowsMultipleSelection: false
+            });
+
+            if (!photo.assets || photo.assets.length === 0) {
+                console.error('No photo selected');
+                return;
+            }
+
+            const photoUri = photo.assets[0].uri;
+
+            const data = new FormData();
+            data.append('photo', {
+                name: photo.assets[0].fileName || `photo-${Date.now()}.jpg`,
+                type: 'image/jpeg', // Or 'image/png' based on your photo type
+                uri: photoUri,
+            });
+
+            const response = await fetch(`${API_BASEURL}/api/upload`, {
+                method: 'POST',
+                body: data,
+                headers: {
+                    Accept: 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                console.error('Upload failed with status:', response.status);
+                return;
+            }
+
+            const result = await response.json();
+            try {
+                // uploaded img add in trip completed collection
+                const imgUpload = await axios.post(`${API_BASEURL}/api/trip-complete/${_id}`, {
+                    tripDoc: [result.files[0].filename]
+                }, {
+                    headers: {
+                        Authorization: token || ""
+                    }
+                })
+                Toast.show({
+                    type: "success",
+                    text1: "Success",
+                    text2: "Img uploaded successfully."
+                })
+                fetchTripCompletedData()
+            } catch (error) {
+                // console.log("Error in add tripCompleted", error);
+
+                Toast.show({
+                    type: "error",
+                    text1: "Failed",
+                    text2: error.response.data.error
+                })
+            }
+        } catch (error) {
+            console.error('Error during upload:', error);
+        }
+    }
+
+    async function fetchTripCompletedData() {
+        try {
+            const res = await axios.get(`${API_BASEURL}/api/trip-complete/${_id}`)
+            setCompletedTripData(res.data)
+        } catch (error) {
+            console.log(error);
+            setCompletedTripData({});
+        }
+    }
+
+    useEffect(() => {
+        if (_id) {
+            fetchTripCompletedData()
+        }
+    }, [_id])
 
     return (
         <View style={[styles.bookingItem, booking.tripCompleted ? styles.disabled : null]}  >
@@ -68,7 +189,7 @@ export default function TripCard({ booking, takePhotoAndUpload, makeCallToDriver
                     <View style={[styles.bookingDetails, { justifyContent: "start", gap: 10 }]}>
                         {(account === "1" || account === "3" || account === "2") &&
                             <>
-                                <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => (account === "1" || account === "3") && navigation.navigate("Allotment", { id: booking._id })} title="Alloment">
+                                <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => handleAllotment(booking)} title="Alloment">
                                     <Image style={{ width: 18, height: 18 }} source={require("../../assets/images/booking.png")} />
                                 </View>
                                 <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => makeCallToDriver(booking._id)}>
@@ -82,12 +203,12 @@ export default function TripCard({ booking, takePhotoAndUpload, makeCallToDriver
                         {
                             account === "4" &&
                             <>
-                                <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => takePhotoAndUpload(booking._id)}>
+                                <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => completedTripData?.tripDoc?.length === 0 ? takePhotoAndUpload(booking._id) : warnMsg("starting km")}>
                                     <Text style={styles.iconTxt} >
                                         Start
                                     </Text>
                                 </View>
-                                <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => takePhotoAndUpload(booking._id)}>
+                                <View style={[styles.iconBg, booking.tripCompleted ? styles.btnDisabled : null]} onStartShouldSetResponder={() => completedTripData?.tripDoc?.length === 1 ? takePhotoAndUpload(booking._id) : warnMsg("closing km")}>
                                     <Text style={styles.iconTxt} >
                                         End
                                     </Text>

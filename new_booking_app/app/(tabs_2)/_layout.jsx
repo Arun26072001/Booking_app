@@ -7,7 +7,6 @@ import { Platform, TouchableHighlight, StyleSheet } from "react-native";
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function TabsLayout() {
   const { data, logout } = useContext(EssentialValues);
@@ -48,56 +47,6 @@ export default function TabsLayout() {
           options={{
             title: "Allotment",
             tabBarIcon: ({ color }) => <MaterialIcons name="taxi-alert" size={24} color={color} />,
-          }}
-        />
-      )}
-
-      {data?.account && ["1", "2"].includes(data.account) && (
-        <Tabs.Screen
-          name="Booking"
-          options={{
-            title: "Booking",
-            tabBarIcon: ({ color }) => <FontAwesome6 name="ticket" size={24} color={color} />,
-          }}
-        />
-      )}
-
-      {data?.account && ["1", "2", "3"].includes(data.account) && (
-        <Tabs.Screen
-          name="Customers"
-          options={{
-            title: "Customers",
-            tabBarIcon: ({ color }) => <FontAwesome6 name="users" size={24} color={color} />,
-          }}
-        />
-      )}
-
-      {data?.account && ["1", "2"].includes(data.account) && (
-        <Tabs.Screen
-          name="Register"
-          options={{
-            title: "Register",
-            tabBarIcon: ({ color }) => <Entypo name="add-user" size={24} color={color} />,
-          }}
-        />
-      )}
-
-      {data?.account && ["1"].includes(data.account) ? (
-        <Tabs.Screen
-          name="Vehicle"
-          options={{
-            title: "Vehicle",
-            tabBarIcon: ({ color }) => <FontAwesome6 name="taxi" size={24} color={color} />,
-          }}
-        />
-      ) : null}
-
-      {data?.account && ["1", "4"].includes(data.account) && (
-        <Tabs.Screen
-          name="TripCompleted"
-          options={{
-            title: "Trip Completed",
-            tabBarIcon: ({ color }) => <AntDesign name="checkcircle" size={24} color={color} />,
           }}
         />
       )}

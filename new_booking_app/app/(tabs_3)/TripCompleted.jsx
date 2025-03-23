@@ -11,7 +11,7 @@ import { API_BASEURL } from "@env";
 export default function TripCompleted() {
   const router = useRouter();
   const bookingData = useLocalSearchParams(); // ✅ Replace route.params with Expo Router method
-  const { id, tripCompleted } = bookingData;
+  const { _id, tripCompleted, allotment } = bookingData;
   const { data } = useContext(EssentialValues);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState([]);
@@ -22,7 +22,7 @@ export default function TripCompleted() {
     const body = { ...tripDetails };
     setIsWorkingApi(true);
     try {
-      const response = await axios.post(`${API_BASEURL}/api/trip-complete/${id}`, body, {
+      const response = await axios.post(`${API_BASEURL}/api/trip-complete/${_id}`, body, {
         headers: {
           Authorization: data.token || "",
         },
@@ -51,11 +51,11 @@ export default function TripCompleted() {
     setIsWorkingApi(true);
     try {
       const updatedTripDetails = {
-        bookingId: id,
+        bookingId: _id,
         ...tripDetails
       };
 
-      const response = await axios.put(`${API_BASEURL}/api/trip-complete/${id}`, updatedTripDetails, {
+      const response = await axios.put(`${API_BASEURL}/api/trip-complete/${_id}`, updatedTripDetails, {
         headers: {
           Authorization: data.token || "",
         },
@@ -138,11 +138,11 @@ export default function TripCompleted() {
     async function fetchTripCompletedDetails() {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${API_BASEURL}/api/trip-complete/${id}`);
+        const response = await axios.get(`${API_BASEURL}/api/trip-complete/${_id}`);
         const { startingKm, closingKm, receivedAmount } = response.data;
 
         setTripDetails({
-          id: response.data.id,
+          _id: response.data._id,
           startingKm: String(startingKm),
           closingKm: String(closingKm),
           receivedAmount: String(receivedAmount),
@@ -159,17 +159,17 @@ export default function TripCompleted() {
       }
     }
 
-    if (bookingData.allotment && data?.account === "1" && tripCompleted) {
+    if (allotment && ["1", "4"].includes(data.account) && tripCompleted) {
       fetchTripCompletedDetails();
     } else {
       Toast.show({
         type: "info",
         text1: "Warning",
-        test2: "Trip Not yet started"
+        text2: "Trip Not yet started"
       })
       router.push("/Home");
     }
-  }, [id, data.account, tripCompleted]); // ✅ Added dependencies
+  }, [_id, data.account, tripCompleted]); // ✅ Added dependencies
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -211,9 +211,9 @@ export default function TripCompleted() {
               Upload Trip Documents
             </Button>
             <Button
-              onPress={data.account === "1" && tripDetails?.id ? updateCompletedTrip : completeTrip}
+              onPress={data.account === "1" && tripDetails?._id ? updateCompletedTrip : completeTrip}
             >
-              {isWorkingApi ? <Spinner color={"white"} /> : data.account === "1" && tripDetails?.id ? "Update Completed Trip" : "Complete Trip"}
+              {isWorkingApi ? <Spinner color={"white"} /> : data.account === "1" && tripDetails?._id ? "Update Completed Trip" : "Complete Trip"}
             </Button>
           </VStack>
         </Box>
