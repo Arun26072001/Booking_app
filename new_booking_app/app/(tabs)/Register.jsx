@@ -3,13 +3,14 @@ import { ScrollView, StyleSheet, Text } from "react-native";
 import { Button, Box, Heading, VStack, FormControl, Input, Link, HStack, Spinner } from "native-base";
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import { API_BASEURL } from "@env";
+// import { API_BASEURL } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 
 export default function Register() {
     const router = useRouter();
+   
     const [token, setToken] = useState("");
     const [isWorkingApi, setIsWorkingApi] = useState(false);
     const [registerData, setRegisterData] = useState({
@@ -31,7 +32,7 @@ export default function Register() {
     async function addEmployee() {
         setIsWorkingApi(true);
         try {
-            const addEmp = await axios.post(`${API_BASEURL}/api/auth`, registerData, {
+            const addEmp = await axios.post(`http://147.79.70.8:3030/api/auth`, registerData, {
                 headers: {
                     Authorization: token || ""
                 }

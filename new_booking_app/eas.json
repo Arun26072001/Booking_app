@@ -4,15 +4,17 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "API_BASEURL": "http://147.79.70.8:3030"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "distribution": "store",
+      "env": {
+        "API_BASEURL": "http://147.79.70.8:3030"
+      }
     }
   },
   "submit": {

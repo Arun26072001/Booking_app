@@ -4,13 +4,14 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
 import { warnMsg } from "../ReusableFunctions";
-import { API_BASEURL } from "@env";
+// import { API_BASEURL } from "@env";
 import Toast from "react-native-toast-message";
 import axios from "axios";
 import { EssentialValues } from "@/app/_layout";
 
 export default function TripCard({ booking, account, updateTripCompleted, allotments }) {
     const { data } = useContext(EssentialValues);
+   
     const { token } = data;
     const router = useRouter();
     const { _id } = booking;
@@ -78,7 +79,7 @@ export default function TripCard({ booking, account, updateTripCompleted, allotm
                 uri: photoUri,
             });
 
-            const response = await fetch(`${API_BASEURL}/api/upload`, {
+            const response = await fetch(`http://147.79.70.8:3030/api/upload`, {
                 method: 'POST',
                 body: data,
                 headers: {
@@ -94,7 +95,7 @@ export default function TripCard({ booking, account, updateTripCompleted, allotm
             const result = await response.json();
             try {
                 // uploaded img add in trip completed collection
-                const imgUpload = await axios.post(`${API_BASEURL}/api/trip-complete/${_id}`, {
+                const imgUpload = await axios.post(`http://147.79.70.8:3030/api/trip-complete/${_id}`, {
                     tripDoc: [result.files[0].filename]
                 }, {
                     headers: {
@@ -123,7 +124,7 @@ export default function TripCard({ booking, account, updateTripCompleted, allotm
 
     async function fetchTripCompletedData() {
         try {
-            const res = await axios.get(`${API_BASEURL}/api/trip-complete/${_id}`)
+            const res = await axios.get(`http://147.79.70.8:3030/api/trip-complete/${_id}`)
             setCompletedTripData(res.data)
         } catch (error) {
             console.log(error);

@@ -4,10 +4,13 @@ import { StyleSheet } from "react-native";
 import { EssentialValues } from "./_layout";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const Login = () => {
   const { loginUser, isLoading } = useContext(EssentialValues);
   const router = useRouter();
+  const url = "http://147.79.70.8:3030";
+  const [testData, setTestdata] = useState("");
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
@@ -43,12 +46,26 @@ const Login = () => {
     performLogin();
   }, []);
 
+  useEffect(() => {
+    async function fetchbasicApi() {
+      try {
+        const res = await axios.get(`${url}/`);
+        setTestdata(res.data.message);
+      } catch (error) {
+        console.log(error);
+        
+        // setTestdata(error);
+      }
+    }
+    fetchbasicApi();
+  }, [])
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Center w="100%">
         <Box safeArea p="2" py="8" w="90%" maxW="290">
           <Heading size="lg" fontWeight="600" color="coolGray.800">
-            Welcome
+            Welcome {testData}
           </Heading>
           <Heading mt="1" color="coolGray.600" fontWeight="medium" size="xs">
             Sign in to continue!

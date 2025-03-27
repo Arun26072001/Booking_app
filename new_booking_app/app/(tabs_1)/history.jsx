@@ -4,11 +4,12 @@ import axios from "axios";
 import NoFound from "../../components/ui/NoFound";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { EssentialValues } from "../_layout";
-import { API_BASEURL } from "@env";
+// import { API_BASEURL } from "@env";
 import { useRouter } from 'expo-router';
 
 export default function BookingHistory() {
     const router = useRouter();
+   
     const [bookings, setBookings] = useState([]);
     const [allotments, setAllotments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +29,7 @@ export default function BookingHistory() {
 
     async function fetchAllertedBooking() {
         try {
-            const alts = await axios.get(`${API_BASEURL}/api/allotment`);
+            const alts = await axios.get(`http://147.79.70.8:3030/api/allotment`);
             setAllotments(alts.data);
         } catch (error) {
             console.log(error);
@@ -38,7 +39,7 @@ export default function BookingHistory() {
     async function getAllotorBooking() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`${API_BASEURL}/api/booking/allotor-booking/${_id}`, {
+            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/allotor-booking/${_id}`, {
                 headers: {
                     Authorization: token || ""
                 }
@@ -53,7 +54,7 @@ export default function BookingHistory() {
     async function getDriverBookings() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`${API_BASEURL}/api/booking/driver-booking/${_id}`);
+            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/driver-booking/${_id}`);
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
@@ -65,7 +66,7 @@ export default function BookingHistory() {
         const getBookings = async () => {
             setIsLoading(true);
             try {
-                const booking = await axios.get(`${API_BASEURL}/api/booking`);
+                const booking = await axios.get(`http://147.79.70.8:3030/api/booking`);
                 const allBookings = booking.data.filter((data) => data.tripCompleted === true);
                 if (account === "1") {
                     setBookings(allBookings);

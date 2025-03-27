@@ -6,10 +6,11 @@ import Toast from "react-native-toast-message";
 import { EssentialValues } from "../_layout";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { API_BASEURL } from "@env";
+// import { API_BASEURL } from "@env";
 
 export default function TripCompleted() {
   const router = useRouter();
+ 
   const bookingData = useLocalSearchParams(); // ✅ Replace route.params with Expo Router method
   const { id, tripCompleted } = bookingData;
   const { data } = useContext(EssentialValues);
@@ -22,7 +23,7 @@ export default function TripCompleted() {
     const body = { ...tripDetails };
     setIsWorkingApi(true);
     try {
-      const response = await axios.post(`${API_BASEURL}/api/trip-complete/${id}`, body, {
+      const response = await axios.post(`http://147.79.70.8:3030/api/trip-complete/${id}`, body, {
         headers: {
           Authorization: data.token || "",
         },
@@ -55,7 +56,7 @@ export default function TripCompleted() {
         ...tripDetails
       };
 
-      const response = await axios.put(`${API_BASEURL}/api/trip-complete/${id}`, updatedTripDetails, {
+      const response = await axios.put(`http://147.79.70.8:3030/api/trip-complete/${id}`, updatedTripDetails, {
         headers: {
           Authorization: data.token || "",
         },
@@ -105,7 +106,7 @@ export default function TripCompleted() {
           });
         });
 
-        const response = await fetch(`${API_BASEURL}/api/upload`, {
+        const response = await fetch(`http://147.79.70.8:3030/api/upload`, {
           method: "POST",
           body: data,
           headers: { Accept: "application/json" },
@@ -138,7 +139,7 @@ export default function TripCompleted() {
     async function fetchTripCompletedDetails() {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${API_BASEURL}/api/trip-complete/${id}`);
+        const response = await axios.get(`http://147.79.70.8:3030/api/trip-complete/${id}`);
         const { startingKm, closingKm, receivedAmount } = response.data;
 
         setTripDetails({

@@ -30,7 +30,7 @@ export default function Allotment() {
   const addAllotment = async () => {
     setIsWorkingApi(true);
     try {
-      const allot = await axios.post(`${API_BASEURL}/api/allotment/${bookingData._id}`, allotment);
+      const allot = await axios.post(`http://147.79.70.8:3030/api/allotment/${bookingData._id}`, allotment);
       Toast.show({ type: 'success', text1: allot?.data?.message });
       setAllotment({ allotmentOfficer: '', driver: '', vehicle: '' });
       updateBooking();
@@ -48,7 +48,7 @@ export default function Allotment() {
         ...allotment
       };
 
-      const update = await axios.put(`${API_BASEURL}/api/allotment/${bookingData._id}`, updatedDetails, {
+      const update = await axios.put(`http://147.79.70.8:3030/api/allotment/${bookingData._id}`, updatedDetails, {
         headers: { Authorization: data.token || '' },
       });
       Toast.show({ type: 'success', text1: 'Success', text2: update?.data?.message });
@@ -63,7 +63,7 @@ export default function Allotment() {
 
   async function fetchVehicles() {
     try {
-      const res = await axios.get(`${API_BASEURL}/api/vehicle`);
+      const res = await axios.get(`http://147.79.70.8:3030/api/vehicle`);
       setVehicles(res.data);
     } catch (error) {
       setVehicles([]);
@@ -73,7 +73,7 @@ export default function Allotment() {
   async function fetchEmps() {
     setIsLoading(true);
     try {
-      const emps = await axios.get(`${API_BASEURL}/api/auth`);
+      const emps = await axios.get(`http://147.79.70.8:3030/api/auth`);
       setDrivers(emps.data.filter((emp) => emp.account === 4));
       setEmployees(emps.data);
     } catch (error) {
@@ -97,7 +97,7 @@ export default function Allotment() {
   useEffect(() => {
     async function fetchAllotment() {
       try {
-        const allotedDatails = await axios.get(`${API_BASEURL}/api/allotment/${params._id}`);
+        const allotedDatails = await axios.get(`http://147.79.70.8:3030/api/allotment/${params._id}`);
         setAllotment(allotedDatails.data);
       } catch (error) {
         Toast.show({ type: 'info', text1: 'Fill up below details', text2: error.response.data.error });

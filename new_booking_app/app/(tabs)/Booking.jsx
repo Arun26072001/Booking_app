@@ -4,7 +4,7 @@ import Toast from "react-native-toast-message";
 import { Center, Box, Heading, VStack, FormControl, Input, Button, Spinner } from "native-base";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
-import { API_BASEURL } from "@env";
+// import { API_BASEURL } from "@env";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { EssentialValues } from "../_layout";
 import { Picker } from '@react-native-picker/picker';
@@ -107,7 +107,7 @@ export default function Booking() {
                 "dropDateTime": `${dropDate} ${dropTime}`
             }
 
-            const bookingAdding = await axios.post(`${API_BASEURL}/api/booking/${data._id}`, newBooking, {
+            const bookingAdding = await axios.post(`http://147.79.70.8:3030/api/booking/${data._id}`, newBooking, {
                 headers: {
                     Authorization: data.token || ""
                 }
@@ -131,7 +131,7 @@ export default function Booking() {
 
     async function fetchStates() {
         try {
-            const states = await axios.get(`${API_BASEURL}/api/state`);
+            const states = await axios.get(`http://147.79.70.8:3030/api/state`);
             setStateData(states.data);
         } catch (error) {
             Toast.show({
@@ -144,7 +144,7 @@ export default function Booking() {
 
     async function fetchVehicle() {
         try {
-            const vehiclesData = await axios.get(`${API_BASEURL}/api/vehicle`);
+            const vehiclesData = await axios.get(`http://147.79.70.8:3030/api/vehicle`);
             setVehicles(vehiclesData.data);
 
         } catch (error) {
@@ -158,7 +158,7 @@ export default function Booking() {
     async function editBooking() {
         setIsWorkingApi(true);
         try {
-            const res = await axios.put(`${API_BASEURL}/api/booking/${bookingId}`, bookingObj, {
+            const res = await axios.put(`http://147.79.70.8:3030/api/booking/${bookingId}`, bookingObj, {
                 headers: {
                     Authorization: data.token || ""
                 }
@@ -185,7 +185,7 @@ export default function Booking() {
         async function fetchBooking() {
             setIsLoading(true);
             try {
-                const booking = await axios.get(`${API_BASEURL}/api/booking/${bookingId}`);
+                const booking = await axios.get(`http://147.79.70.8:3030/api/booking/${bookingId}`);
                 // console.log(booking.data);
 
                 setBookingObj(booking.data);
@@ -212,7 +212,7 @@ export default function Booking() {
 
     async function fetchEmps() {
         try {
-            const response = await axios.get(`${API_BASEURL}/api/auth`);
+            const response = await axios.get(`http://147.79.70.8:3030/api/auth`);
             setEmployees(response.data);
             setDrivers(response.data.filter((emp) => emp.account === 4));
 

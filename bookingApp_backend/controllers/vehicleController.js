@@ -22,11 +22,38 @@ async function addVehicle(req, res) {
 
 async function getAllVehicles(req, res) {
     try {
-        const vehicles = await Vehicle.find({}, "_id name").exec();
+        const vehicles = await Vehicle.find().exec();
         res.send(vehicles)
     } catch (error) {
         res.send({ error: error.message })
     }
 }
 
-module.exports = { addVehicle, getAllVehicles };
+async function updateVehicle(req, res) {
+    try {
+        const { error } = vehicleValidation.validate(req.body);
+        if (error) {
+            return res.status(400).send({ error: error.details[0].message })
+        }
+        const updatedVehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        return res.send({ message: `${updatedVehicle.name} data updated successfully` })
+    } catch (error) {
+        return res.status(500).send({ error: error.message })
+    }
+}
+
+async function getVehicleById(req, res) {
+    try {
+        const vehicle = await Vehicle.findOne({name: req.params.name});
+        if (!vehicle) {
+            return res.status(404).send({ error: "vehicle not found" })
+        } else {
+            return res.send(vehicle)
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: error.message })
+    }
+}
+
+module.exports = { addVehicle, getAllVehicles, getVehicleById, updateVehicle };
