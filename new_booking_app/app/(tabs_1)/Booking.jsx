@@ -1,10 +1,10 @@
 import { ScrollView, TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import Toast from "react-native-toast-message";
-import { Center, Box, Heading, VStack, FormControl, Input, Button, Spinner } from "native-base";
+import { Center, Box, Heading, VStack, FormControl, Input, Button, Loader } from "native-base";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
-// import { API_BASEURL } from "@env";
+import { API_BASEURL } from "@env";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { EssentialValues } from "../_layout";
 import { Picker } from '@react-native-picker/picker';
@@ -13,7 +13,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 export default function Booking() {
     const router = useRouter();
-   
+
     const { bookingId } = useLocalSearchParams();
     const { updateBooking, data } = useContext(EssentialValues);
     const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +108,7 @@ export default function Booking() {
                 "dropDateTime": `${dropDate} ${dropTime}`
             }
 
-            const bookingAdding = await axios.post(`http://147.79.70.8:3030/api/booking/${data._id}`, newBooking, {
+            const bookingAdding = await axios.post(`${API_BASEURL}/api/booking/${data._id}`, newBooking, {
                 headers: {
                     Authorization: data.token || ""
                 }
@@ -132,7 +132,9 @@ export default function Booking() {
 
     async function fetchStates() {
         try {
-            const states = await axios.get(`http://147.79.70.8:3030/api/state`);
+            const states = await axios.get(`${API_BASEURL}/api/state`, {
+                headers: { Authorization: data.token }
+            });
             setStateData(states.data);
         } catch (error) {
             Toast.show({
@@ -145,7 +147,9 @@ export default function Booking() {
 
     async function fetchVehicle() {
         try {
-            const vehiclesData = await axios.get(`http://147.79.70.8:3030/api/vehicle`);
+            const vehiclesData = await axios.get(`${API_BASEURL}/api/vehicle`, {
+                headers: { Authorization: data.token }
+            });
             setVehicles(vehiclesData.data);
 
         } catch (error) {
@@ -159,7 +163,7 @@ export default function Booking() {
     async function editBooking() {
         setIsWorkingApi(true);
         try {
-            const res = await axios.put(`http://147.79.70.8:3030/api/booking/${bookingId}`, bookingObj, {
+            const res = await axios.put(`${API_BASEURL}/api/booking/${bookingId}`, bookingObj, {
                 headers: {
                     Authorization: data.token || ""
                 }
@@ -186,8 +190,9 @@ export default function Booking() {
         async function fetchBooking() {
             setIsLoading(true);
             try {
-                const booking = await axios.get(`http://147.79.70.8:3030/api/booking/${bookingId}`);
-                // console.log(booking.data);
+                const booking = await axios.get(`${API_BASEURL}/api/booking/${bookingId}`, {
+                    headers: { Authorization: data.token }
+                });
 
                 setBookingObj(booking.data);
                 const { pickupDateTime, dropDateTime } = booking.data
@@ -213,7 +218,11 @@ export default function Booking() {
 
     async function fetchEmps() {
         try {
-            const response = await axios.get(`http://147.79.70.8:3030/api/auth`);
+            const response = await axios.get(`${API_BASEURL}/api/auth`, {
+                headers: {
+                    Authorization: token || ""
+                }
+            });
             setEmployees(response.data);
             setDrivers(response.data.filter((emp) => emp.account === 4));
 
@@ -238,7 +247,7 @@ export default function Booking() {
 
     return (
         <ScrollView>
-            {isLoading ? <Spinner size="large" color="blue" /> :
+            {isLoading ? <Loader size="large" color="blue" /> :
                 <Center w="100%">
                     <Box safeArea p="2" w="90%" maxW="290" py="8">
                         <Heading size="lg" color="coolGray.800" _dark={{
@@ -495,7 +504,7 @@ export default function Booking() {
                                 </>
                             }
                             <Button style={{ marginBottom: 20 }} backgroundColor={"#355F2E"} onPress={bookingId ? editBooking : addBooking}  >
-                                {isWorkingApi ? <Spinner color={"white"} /> : bookingId ? "Update Booking" : "Add Booking"}
+                                {isWorkingApi ? <Loader color={"white"} /> : bookingId ? "Update Booking" : "Add Booking"}
                             </Button>
                         </VStack>
                     </Box>

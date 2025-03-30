@@ -7,7 +7,6 @@ import { Platform, TouchableHighlight, StyleSheet } from "react-native";
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function TabsLayout() {
   const { data, logout } = useContext(EssentialValues);

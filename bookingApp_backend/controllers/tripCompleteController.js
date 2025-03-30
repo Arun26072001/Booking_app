@@ -34,7 +34,7 @@ const completeTripToDriver = async (req, res) => {
 
             // Update booking details
             if (![0, undefined, ""].includes(startingKm) && ![0, undefined, ""].includes(closingKm)) {
-                console.log(startingKm, closingKm);
+                // console.log(startingKm, closingKm);
 
                 booking.tripCompleted = true;
                 await booking.save();
@@ -42,6 +42,7 @@ const completeTripToDriver = async (req, res) => {
 
             return res.send({
                 message: `${existingTrip.startingKm} - ${existingTrip.closingKm} trip has been updated successfully!`,
+                existingTrip
             });
         } else {
 
@@ -57,7 +58,7 @@ const completeTripToDriver = async (req, res) => {
             booking.vehicleInTrip = newTripComplete._id;
             await booking.save();
 
-            return res.status(201).send({ message: "Trip completed and image uploaded successfully!" });
+            return res.status(201).send({ message: "Trip completed and image uploaded successfully!", newTripComplete });
         }
     } catch (error) {
         console.error(error);
@@ -68,7 +69,7 @@ const completeTripToDriver = async (req, res) => {
 const getCompletedTripDetails = async (req, res) => {
     try {
         let completedTrip = await TripComplete.findOne({ bookingId: req.params.id }).exec();
-        if (completedTrip._id) {
+        if (completedTrip?._id) {
             completedTrip = {
                 ...completedTrip.toObject(),
                 tripDoc: completedTrip.tripDoc.filter((file) => file !== "")
@@ -78,20 +79,26 @@ const getCompletedTripDetails = async (req, res) => {
             res.status(404).send({ error: "Starting and closing Km not updated in this booking!" })
         }
     } catch (error) {
+        console.log(error);
+
         res.status(500).send({ error: error.message })
     }
 }
 
 const updateCompletedTrip = async (req, res) => {
     try {
-        const validation = TripCompleteValidation.validate(req.body);
-        const { error } = validation;
-        if (error) {
-            return res.status(400).send({ error: error.details[0].message })
-        } else {
-            const updateTrip = await TripComplete.findOneAndUpdate({ bookingId: req.params.id }, req.body, { new: true });
-            res.send({ message: `Taxi ran in ${updateTrip.startingKm} - ${updateTrip.closingKm} with trip has been completed` })
+        // const validation = TripCompleteValidation.validate(req.body);
+        // const { error } = validation;
+        // if (error) {
+        //     return res.status(400).send({ error: error.details[0].message })
+        // } else {
+        const tripCompleteData = await TripComplete.findOne({ bookingId: req.params.id });
+        if (!tripCompleteData) {
+            return res.status(404).send({ error: "TripCompleted data not found" })
         }
+        const updateTrip = await TripComplete.findOneAndUpdate({ bookingId: req.params.id }, req.body, { new: true });
+        res.send({ message: `Taxi ran in ${updateTrip.startingKm} - ${updateTrip.closingKm} with trip has been completed` })
+        // }
     } catch (error) {
         res.status(500).send({ error: error.message })
     }

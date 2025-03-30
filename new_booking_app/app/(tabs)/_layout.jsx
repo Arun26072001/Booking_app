@@ -8,6 +8,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 export default function TabsLayout() {
   const { data, logout } = useContext(EssentialValues);
@@ -74,10 +75,10 @@ export default function TabsLayout() {
 
       {data?.account && ["1", "2"].includes(data.account) && (
         <Tabs.Screen
-          name="Register"
+          name="Employees"
           options={{
-            title: "Register",
-            tabBarIcon: ({ color }) => <Entypo name="add-user" size={24} color={color} />,
+            title: "Employees",
+            tabBarIcon: ({ color }) => <FontAwesome5 name="user-tie" size={24} color={color} />,
           }}
         />
       )}

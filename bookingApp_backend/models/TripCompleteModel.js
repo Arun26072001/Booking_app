@@ -16,6 +16,8 @@ const tripCompleteSchema = new mongoose.Schema(
 const TripComplete = mongoose.model('tripComplete', tripCompleteSchema)
 
 const TripCompleteValidation = Joi.object({
+    _id: Joi.string().optional(),
+    __v: Joi.number().optional(),
     bookingId: Joi.string().hex().length(24).required(), // Valid MongoDB ObjectId
     startingKm: Joi.number().positive().required(),
     closingKm: Joi.number().positive().min(Joi.ref('startingKm')).required(), // closingKm should be >= startingKm

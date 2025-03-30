@@ -7,12 +7,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { NativeBaseProvider } from "native-base";
-// import { API_BASEURL } from "@env";
+import { API_BASEURL } from "@env";
 
 export const EssentialValues = createContext(null);
 
 export default function RootLayout() {
- 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState({
@@ -39,13 +38,12 @@ export default function RootLayout() {
   };
 
   const loginUser = async (credentials) => {
+
     setIsLoading(true);
     try {
-      const response = await axios.post(`http://147.79.70.8:3030/api/auth/login`, credentials);
+      const response = await axios.post(`${API_BASEURL}/api/auth/login`, credentials);
 
       const decodedData = jwtDecode(response.data); // ✅ Fixed
-      console.log("Decoded Data:", decodedData);
-
       const { name, email, account, _id } = decodedData;
 
       setData({ _id, name, email, account: String(account), token: response.data });
@@ -70,7 +68,7 @@ export default function RootLayout() {
         router.replace("/(tabs)/Home");
       }// ✅ Fixed
     } catch (error) {
-      console.log("Login Error:", error);
+      console.log("Login Error:", error.response.data.error);
 
       Toast.show({
         type: "error",

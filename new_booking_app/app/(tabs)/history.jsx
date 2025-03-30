@@ -4,11 +4,11 @@ import axios from "axios";
 import NoFound from "../../components/ui/NoFound";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { EssentialValues } from "../_layout";
-// import { API_BASEURL } from "@env";
-import { useRouter } from 'expo-router';
+import { API_BASEURL } from "@env";
+import Loader from "@/components/ui/Loader";
 
 export default function BookingHistory() {
-   
+
     const [bookings, setBookings] = useState([]);
     const [allotments, setAllotments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,9 @@ export default function BookingHistory() {
 
     async function fetchAllertedBooking() {
         try {
-            const alts = await axios.get(`http://147.79.70.8:3030/api/allotment`);
+            const alts = await axios.get(`${API_BASEURL}/api/allotment`, {
+                headers: { Authorization: data.token }
+            });
             setAllotments(alts.data);
         } catch (error) {
             console.log(error);
@@ -38,7 +40,7 @@ export default function BookingHistory() {
     async function getAllotorBooking() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/allotor-booking/${_id}`, {
+            const trips = await axios.get(`${API_BASEURL}/api/booking/allotor-booking/${_id}`, {
                 headers: {
                     Authorization: token || ""
                 }
@@ -53,7 +55,9 @@ export default function BookingHistory() {
     async function getDriverBookings() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/driver-booking/${_id}`);
+            const trips = await axios.get(`${API_BASEURL}/api/booking/driver-booking/${_id}`, {
+                headers: { Authorization: data.token }
+            });
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
@@ -65,7 +69,9 @@ export default function BookingHistory() {
         const getBookings = async () => {
             setIsLoading(true);
             try {
-                const booking = await axios.get(`http://147.79.70.8:3030/api/booking`);
+                const booking = await axios.get(`${API_BASEURL}/api/booking`, {
+                    headers: { Authorization: data.token }
+                });
                 const allBookings = booking.data.filter((data) => data.tripCompleted === true);
                 if (account === "1") {
                     setBookings(allBookings);
@@ -91,7 +97,7 @@ export default function BookingHistory() {
         <ScrollView>
             <View style={styles.container}>
                 {isLoading ? (
-                    <ActivityIndicator size="large" color="blue" />
+                    <Loader size="large" color="blue" />
                 ) : (
                     errorMsg || bookings.length === 0 ? (
                         <NoFound message={errorMsg || "No History of Bookings"} />

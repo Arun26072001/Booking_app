@@ -13,12 +13,12 @@ const Vehicle = mongoose.model("vehicle", vehicleSchema);
 
 const vehicleValidation = Joi.object({
     _id: Joi.string().optional(),
+    __v: Joi.number().optional(),
     name: Joi.string().required().label("Vehicle Name"),
     perKm: Joi.number().positive().required().label("Price Per Kilometer"),
     perDay: Joi.number().positive().required().label("Price Per Day"),
     capacity: Joi.number().integer().positive().required().label("Capacity"),
     vehicleNo: Joi.string().required().label("Vehicle Number"),
-    __v: Joi.number().optional()
 });
 
 module.exports = { Vehicle, vehicleValidation }

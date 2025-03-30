@@ -38,7 +38,6 @@ imgUpload.post("/", upload.array("photo", 10), async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).send({ message: "No files uploaded." });
     }
-    console.log("uploaded", req.files);
 
     // Respond with the conversion results
     res.status(200).send({

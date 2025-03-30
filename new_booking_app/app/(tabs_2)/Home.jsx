@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import NoFound from "../../components/ui/NoFound";
@@ -8,13 +8,14 @@ import TripCard from "../../components/ui/TripCard";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { warnMsg } from "../../components/ReusableFunctions";
-// import { API_BASEURL } from "@env";
+import { API_BASEURL } from "@env";
 import { useRouter } from 'expo-router';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Loader from "@/components/ui/Loader";
 
 export default function Home() {
     const router = useRouter();
-   
+
     const { data, changeBookings, updateBooking } = useContext(EssentialValues);
     const { account, _id, token } = data;
     const [allotments, setAllotments] = useState([]);
@@ -25,7 +26,7 @@ export default function Home() {
     async function getAllotorBooking() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/allotor-booking/${_id}`, {
+            const trips = await axios.get(`${API_BASEURL}/api/booking/allotor-booking/${_id}`, {
                 headers: {
                     Authorization: token || ""
                 }
@@ -39,7 +40,9 @@ export default function Home() {
     }
     async function fetchAllertedBooking() {
         try {
-            const alts = await axios.get(`http://147.79.70.8:3030/api/allotment`);
+            const alts = await axios.get(`${API_BASEURL}/api/allotment`, {
+                headers: { Authorization: token }
+            });
             setAllotments(alts.data);
         } catch (error) {
 
@@ -53,7 +56,9 @@ export default function Home() {
     const getBookings = async () => {
         setIsLoading(true);
         try {
-            const booking = await axios.get(`http://147.79.70.8:3030/api/booking`);
+            const booking = await axios.get(`${API_BASEURL}/api/booking`, {
+                headers: { Authorization: token }
+            });
             const allBookings = booking.data.filter((data) => data.tripCompleted === false);
 
             if (account === "1") {
@@ -72,7 +77,9 @@ export default function Home() {
     async function getDriverBookings() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/driver-booking/${_id}`);
+            const trips = await axios.get(`${API_BASEURL}/api/booking/driver-booking/${_id}`, {
+                headers: { Authorization: token }
+            });
             setBookings(trips.data.filter((data) => data.tripCompleted === false));
         } catch (error) {
             console.log("Error in fetch driver bookings", error);
@@ -95,7 +102,9 @@ export default function Home() {
 
     async function deleteBooking(booking) {
         try {
-            await axios.delete(`http://147.79.70.8:3030/api/booking/${booking._id}`);
+            await axios.delete(`${API_BASEURL}/api/booking/${booking._id}`, {
+                headers: { Authorization: token }
+            });
             Toast.show({ type: "success", text1: "Success", text2: "Booking deleted successfully" });
             updateBooking();
         } catch (error) {
@@ -112,7 +121,7 @@ export default function Home() {
 
     function updateTripCompleted(booking) {
         if (account === "1") {
-            router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted }})
+            router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted } })
         } else {
             const isAlloted = allotments.find((allot) => allot.bookingId === booking._id);
             if (isAlloted) {
@@ -128,7 +137,7 @@ export default function Home() {
         if (booking.tripCompleted) {
             if (account === "1") {
                 // Navigate if account is "1" and trip is completed
-                router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted }})
+                router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted } })
             } else {
                 // Show toast if trip is already completed
                 Toast.show({
@@ -138,13 +147,15 @@ export default function Home() {
             }
         } else if (["1", "3", "4"].includes(account)) {
             // Navigate for accounts "1", "3", or "4" if the trip is not completed
-            router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted, allotment: booking.allotment }})
+            router.push({ pathname: "/TripCompleted", params: { id: booking._id, tripCompleted: booking.tripCompleted, allotment: booking.allotment } })
         }
     };
 
     async function deleteBooking(booking) {
         try {
-            const deletedBooking = await axios.delete(`http://147.79.70.8:3030/api/booking/${booking._id}`);
+            const deletedBooking = await axios.delete(`${API_BASEURL}/api/booking/${booking._id}`, {
+                headers: { Authorization: token }
+            });
             Toast.show({
                 type: "success",
                 text1: "success",
@@ -201,7 +212,7 @@ export default function Home() {
     );
 
     if (isLoading) {
-        return <ActivityIndicator size="large" color="blue" />;
+        return <Loader size="large" color="blue" />;
     }
 
     if (errorMsg) {

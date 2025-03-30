@@ -1,19 +1,19 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View, Image, TouchableOpacity } from "react-native";
-import { Box, Heading, VStack, FormControl, Input, Button, Spinner } from "native-base";
+import { Box, Heading, VStack, FormControl, Input, Button } from "native-base";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { EssentialValues } from "../_layout";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-// import { API_BASEURL } from "@env";
+import { API_BASEURL } from "@env";
+import Loader from "@/components/ui/Loader";
 
 export default function TripCompleted() {
   const router = useRouter();
- 
   const bookingData = useLocalSearchParams(); // ✅ Replace route.params with Expo Router method
-  const { _id, tripCompleted, allotment } = bookingData;
-  const { data } = useContext(EssentialValues);
+  const { _id, tripCompleted } = bookingData;
+  const { data, updateBooking } = useContext(EssentialValues);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [tripDetails, setTripDetails] = useState({});
@@ -23,7 +23,7 @@ export default function TripCompleted() {
     const body = { ...tripDetails };
     setIsWorkingApi(true);
     try {
-      const response = await axios.post(`http://147.79.70.8:3030/api/trip-complete/${_id}`, body, {
+      const response = await axios.post(`${API_BASEURL}/api/trip-complete/${_id}`, body, {
         headers: {
           Authorization: data.token || "",
         },
@@ -37,8 +37,11 @@ export default function TripCompleted() {
 
       setTripDetails({});
       setFiles([]);
+      updateBooking();
       router.replace("/Home"); // ✅ Use router.replace() for Expo Router navigation
     } catch (error) {
+      console.log(error);
+      
       Toast.show({
         type: "error",
         text1: "Failed",
@@ -56,7 +59,7 @@ export default function TripCompleted() {
         ...tripDetails
       };
 
-      const response = await axios.put(`http://147.79.70.8:3030/api/trip-complete/${_id}`, updatedTripDetails, {
+      const response = await axios.put(`${API_BASEURL}/api/trip-complete/${_id}`, updatedTripDetails, {
         headers: {
           Authorization: data.token || "",
         },
@@ -106,7 +109,7 @@ export default function TripCompleted() {
           });
         });
 
-        const response = await fetch(`http://147.79.70.8:3030/api/upload`, {
+        const response = await fetch(`${API_BASEURL}/api/upload`, {
           method: "POST",
           body: data,
           headers: { Accept: "application/json" },
@@ -139,17 +142,14 @@ export default function TripCompleted() {
     async function fetchTripCompletedDetails() {
       setIsLoading(true);
       try {
-        const response = await axios.get(`http://147.79.70.8:3030/api/trip-complete/${_id}`);
-        const { startingKm, closingKm, receivedAmount } = response.data;
-
-        setTripDetails({
-          _id: response.data._id,
-          startingKm: String(startingKm),
-          closingKm: String(closingKm),
-          receivedAmount: String(receivedAmount),
+        const response = await axios.get(`${API_BASEURL}/api/trip-complete/${_id}`, {
+          headers: { Authorization: data.token }
         });
+
+        setTripDetails(response.data);
       } catch (error) {
-        console.error(error);
+        router.push("/Home")
+        // console.error(error. response.data.error);
         Toast.show({
           type: "error",
           text1: "Failed",
@@ -160,22 +160,22 @@ export default function TripCompleted() {
       }
     }
 
-    if (allotment && ["1", "4"].includes(data.account) && tripCompleted) {
+    if (bookingData.allotment && ["1", "4"].includes(data?.account) && bookingData.vehicleInTrip) {
       fetchTripCompletedDetails();
     } else {
+      router.push("/Home");
       Toast.show({
         type: "info",
         text1: "Warning",
         text2: "Trip Not yet started"
       })
-      router.push("/Home");
     }
   }, [_id, data.account, tripCompleted]); // ✅ Added dependencies
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {isLoading ? (
-        <Spinner size="large" color="blue" />
+        <Loader size="large" color="blue" />
       ) : (
         <Box safeArea p="2" py="2" w="90%" maxW="290">
           <Heading size="lg" fontWeight="600" color="coolGray.800">
@@ -185,17 +185,17 @@ export default function TripCompleted() {
           <VStack space={3} mt="5">
             <FormControl>
               <FormControl.Label>Starting Km</FormControl.Label>
-              <Input keyboardType="numeric" value={tripDetails.startingKm} onChangeText={(value) => updateTripDetails(value, "startingKm")} />
+              <Input keyboardType="numeric" value={tripDetails?.startingKm ? String(tripDetails?.startingKm) : ""} onChangeText={(value) => updateTripDetails(value, "startingKm")} />
             </FormControl>
 
             <FormControl>
               <FormControl.Label>Closing Km</FormControl.Label>
-              <Input keyboardType="numeric" value={tripDetails.closingKm} onChangeText={(value) => updateTripDetails(value, "closingKm")} />
+              <Input keyboardType="numeric" value={tripDetails?.closingKm ? String(tripDetails?.closingKm) : ""} onChangeText={(value) => updateTripDetails(value, "closingKm")} />
             </FormControl>
 
             <FormControl>
               <FormControl.Label>Received Amount</FormControl.Label>
-              <Input keyboardType="numeric" value={tripDetails.receivedAmount} onChangeText={(value) => updateTripDetails(value, "receivedAmount")} />
+              <Input keyboardType="numeric" value={tripDetails?.receivedAmount ? String(tripDetails?.receivedAmount) : ""} onChangeText={(value) => updateTripDetails(value, "receivedAmount")} />
             </FormControl>
 
             {files.length > 0 && (
@@ -212,9 +212,9 @@ export default function TripCompleted() {
               Upload Trip Documents
             </Button>
             <Button
-              onPress={data.account === "1" && tripDetails?._id ? updateCompletedTrip : completeTrip}
+              onPress={["1", "4"].includes(data.account) && completeTrip}
             >
-              {isWorkingApi ? <Spinner color={"white"} /> : data.account === "1" && tripDetails?._id ? "Update Completed Trip" : "Complete Trip"}
+              {isWorkingApi ? <Loader color={"white"} /> : data.account === "1" && tripDetails?._id ? "Update Completed Trip" : "Complete Trip"}
             </Button>
           </VStack>
         </Box>

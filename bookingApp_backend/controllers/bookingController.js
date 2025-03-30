@@ -36,17 +36,6 @@ async function getBookingById(req, res) {
             .populate("vehicleType")
             .populate({
                 path: "allotment",
-                // populate: [
-                //     {
-                //         path: "allotmentOfficer",
-                //         select: "name"
-                //     },
-                //     {
-                //         path: "driver",
-                //         select: "name"
-                //     }
-
-                // ]
             })
             .populate({ path: "vehicleInTrip" })
         if (!booking) {
@@ -114,6 +103,7 @@ async function getCustomers(req, res) {
 
 async function getBookingByMail(req, res) {
     try {
+
         const booking = await Booking.findOne({ email: req.params.mail }, "customerContact customerName email pickupLocation destination tripType")
             .populate({ path: "vehicleType", select: "name" })
             .populate({
@@ -125,7 +115,8 @@ async function getBookingByMail(req, res) {
             })
             .populate("vehicleInTrip")
             .exec();
-        if (booking._id) {
+
+        if (booking?._id) {
             return res.send(booking)
         } else {
             return res.status(404).send({ error: "No Booking data in this customer mail" })
@@ -177,7 +168,7 @@ async function getAllotorTrips(req, res) {
             })
             .populate({ path: "vehicleType" })
             .exec();
-            
+
         if (driverTrips.length > 0) {
             driverTrips = driverTrips.sort((a, b) => new Date(b.pickupDateTime) - new Date(a.pickupDateTime))
             return res.send(driverTrips);

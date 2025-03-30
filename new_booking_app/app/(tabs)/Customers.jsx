@@ -1,32 +1,45 @@
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Table, TableWrapper, Row, Rows } from 'react-native-table-component';
+import React, { useContext, useEffect, useState } from 'react';
+import { Table, TableWrapper, Row } from 'react-native-table-component';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { Input } from 'native-base';
 import CommonModal from '../../components/CommonModal';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { API_BASEURL } from "@env";
+import Loader from '@/components/ui/Loader';
+import { EssentialValues } from '../_layout';
+import styles from "../TablePageStyle";
 
 export default function Customers() {
+  const { data } = useContext(EssentialValues)
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState(''); // For search functionality
-  const url = process.env.API_BASEURL;
   const [customerData, setCustomerData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isView, setIsView] = useState(false);
-  const tableHead = ['Name', 'Contact', 'Email', 'Pickup', 'Destination', 'TripType'];
+  const tableHead = ['Name', 'Contact', 'Email', 'Pickup', 'Destination', 'TripType', "Action"];
+  const cellWidth = [120, 150, 220, 120, 120, 100, 80]
 
   useEffect(() => {
     async function fetchCustomers() {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${url}/api/booking/customers`);
-        const customerData = response.data.customers.map((data) => [
-          data.customerName,
-          data.customerContact,
-          data.email,
-          data.pickupLocation,
-          data.destination,
-          data.tripType,
+        const response = await axios.get(`${API_BASEURL}/api/booking/customers`, {
+          headers: { Authorization: data.token }
+        });
+        const customerData = response.data.customers.map((item) => [
+          item.customerName,
+          item.customerContact,
+          item.email,
+          item.pickupLocation,
+          item.destination,
+          item.tripType,
+          <Text style={{ width: "100%", textAlign: "center" }}>
+            <TouchableOpacity key={item.email} onPress={() => viewData(item.email)}>
+              <FontAwesome name="eye" size={24} color="black" />
+            </TouchableOpacity>
+          </Text>
         ]);
         setCustomers(customerData);
       } catch (error) {
@@ -49,11 +62,16 @@ export default function Customers() {
     )
   );
 
-  async function viewData(data) {
+  async function viewData(email) {
+
     try {
-      const res = await axios.get(`${url}/api/booking/customer/${data[2]}`);
+      const res = await axios.get(`${API_BASEURL}/api/booking/customer/${email}`, {
+        headers: { Authorization: data.token }
+      });
+      console.log(res.data);
+
       setCustomerData(res.data);
-      setIsView(true)
+      setIsView(true);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -64,81 +82,43 @@ export default function Customers() {
   }
 
   return (
-    isView ? <CommonModal customerData={customerData} isView={isView} setIsView={setIsView} /> :
-      <View style={styles.container}>
-        <Input
-          placeholder="Search by any field..."
-          value={searchTerm}
-          onChangeText={(text) => setSearchTerm(text)}
-          style={styles.searchInput}
-          variant="filled"
-        />
-        <ScrollView horizontal>
-          <Table borderStyle={styles.tableBorder}>
-            <Row
-              data={tableHead}
-              style={styles.tableHead}
-              textStyle={styles.headerText}
-            />
-            {filteredCustomers.length > 0 ? (
-              <TableWrapper>
-                {filteredCustomers.map((rowData, rowIndex) => (
-                  <TouchableOpacity key={rowIndex} onPress={() => viewData(rowData)} >
-                    <Row
-                      data={rowData}
-                      textStyle={styles.rowText}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </TableWrapper>
-            ) : (
-              <Text style={styles.noDataText}>No customers found</Text>
-            )}
-          </Table>
-        </ScrollView>
-      </View>
+    isLoading ? <Loader /> :
+      isView ? <CommonModal customerData={customerData} isView={isView} setIsView={setIsView} /> :
+        <View style={{ flex: 1 }}>
+          <Input
+            placeholder="Search by any field..."
+            value={searchTerm}
+            onChangeText={(text) => setSearchTerm(text)}
+            style={styles.searchInput}
+            variant="filled"
+          />
+          <ScrollView horizontal>
+            <View style={styles.container}>
+              <Table borderStyle={styles.tableBorder}>
+                <Row
+                  data={tableHead}
+                  widthArr={cellWidth}
+                  style={styles.tableHead}
+                  textStyle={styles.headerText}
+                />
+                {filteredCustomers.length > 0 ? (
+                  <TableWrapper>
+                    {filteredCustomers.map((rowData, rowIndex) => (
+                      <Row
+                        key={rowIndex}
+                        widthArr={cellWidth}
+                        data={rowData}
+                        textStyle={styles.rowText}
+                      />
+                    ))}
+                  </TableWrapper>
+                ) : (
+                  <Text style={styles.noDataText}>No customers found</Text>
+                )}
+              </Table>
+            </View>
+          </ScrollView>
+        </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-    marginVertical: 20
-  },
-  searchInput: {
-    marginVertical: 10,
-    paddingHorizontal: 10,
-    fontSize: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  tableBorder: {
-    borderWidth: 1,
-    borderColor: '#c8e1ff',
-  },
-  tableHead: {
-    height: 50,
-    backgroundColor: '#4CAF50',
-  },
-  headerText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#fff',
-  },
-  rowText: {
-    fontSize: 14,
-    textAlign: 'center',
-    padding: 8,
-  },
-  noDataText: {
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#888',
-  },
-});

@@ -1,6 +1,5 @@
 import Toast from "react-native-toast-message";
-// import { API_BASEURL } from "@env";
-const API_BASEURL = "http://147.79.70.8:3030"
+import { API_BASEURL } from "@env";
 
 function warnMsg(type) {
     if (type === "call") {
@@ -44,8 +43,9 @@ function warnMsg(type) {
 
 async function fetchVehicle() {
     try {
-        const vehicles = await axios.get(`http://147.79.70.8:3030/api/vehicle`);
-        // setVehicles(vehiclesData.data);
+        const vehicles = await axios.get(`${API_BASEURL}/api/vehicle`, {
+            headers: { Authorization: data.token }
+        });
         return vehicles.data
 
     } catch (error) {

@@ -7,6 +7,7 @@ const allotment = require("./routers/allotment");
 const completeTrip = require("./routers/trip-complete");
 const state = require("./routers/state");
 const { imgUpload } = require("./controllers/ImgUpload");
+const path = require("path");
 
 const app = express();
 
@@ -23,6 +24,9 @@ app.get("/", (req, res) => {
         }
     });
 });
+
+app.use("/tripDocs", express.static(path.join(__dirname, "tripDocs")));
+
 // Routers
 app.use("/api/auth", auth);
 app.use("/api/booking", booking);

@@ -8,12 +8,11 @@ import TripCard from "../../components/ui/TripCard";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { warnMsg } from "../../components/ReusableFunctions";
-// import { API_BASEURL } from "@env";
+import { API_BASEURL } from "@env";
 import { useRouter } from 'expo-router';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 export default function Home() {
-   
     const router = useRouter();
     const { data, changeBookings, updateBooking } = useContext(EssentialValues);
     const { account, _id, token } = data;
@@ -25,7 +24,7 @@ export default function Home() {
     async function getAllotorBooking() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/allotor-booking/${_id}`, {
+            const trips = await axios.get(`${API_BASEURL}/api/booking/allotor-booking/${_id}`, {
                 headers: {
                     Authorization: token || ""
                 }
@@ -39,7 +38,9 @@ export default function Home() {
     }
     async function fetchAllertedBooking() {
         try {
-            const alts = await axios.get(`http://147.79.70.8:3030/api/allotment`);
+            const alts = await axios.get(`${API_BASEURL}/api/allotment`, {
+                headers: { Authorization: token }
+            });
             setAllotments(alts.data);
         } catch (error) {
 
@@ -49,11 +50,12 @@ export default function Home() {
             })
         }
     }
-
     const getBookings = async () => {
         setIsLoading(true);
         try {
-            const booking = await axios.get(`http://147.79.70.8:3030/api/booking`);
+            const booking = await axios.get(`${API_BASEURL}/api/booking`, {
+                headers: { Authorization: token }
+            });
             const allBookings = booking.data.filter((data) => data.tripCompleted === false);
 
             if (account === "1") {
@@ -72,7 +74,9 @@ export default function Home() {
     async function getDriverBookings() {
         setIsLoading(true);
         try {
-            const trips = await axios.get(`http://147.79.70.8:3030/api/booking/driver-booking/${_id}`);
+            const trips = await axios.get(`${API_BASEURL}/api/booking/driver-booking/${_id}`, {
+                headers: { Authorization: token }
+            });
             setBookings(trips.data.filter((data) => data.tripCompleted === false));
         } catch (error) {
             console.log("Error in fetch driver bookings", error);
@@ -95,7 +99,9 @@ export default function Home() {
 
     async function deleteBooking(booking) {
         try {
-            await axios.delete(`http://147.79.70.8:3030/api/booking/${booking._id}`);
+            await axios.delete(`${API_BASEURL}/api/booking/${booking._id}`, {
+                headers: { Authorization: token }
+            });
             Toast.show({ type: "success", text1: "Success", text2: "Booking deleted successfully" });
             updateBooking();
         } catch (error) {
@@ -144,7 +150,9 @@ export default function Home() {
 
     async function deleteBooking(booking) {
         try {
-            const deletedBooking = await axios.delete(`http://147.79.70.8:3030/api/booking/${booking._id}`);
+            const deletedBooking = await axios.delete(`${API_BASEURL}/api/booking/${booking._id}`, {
+                headers: { Authorization: token }
+            });
             Toast.show({
                 type: "success",
                 text1: "success",

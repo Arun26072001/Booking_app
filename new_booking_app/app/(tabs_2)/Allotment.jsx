@@ -1,12 +1,13 @@
 import { ScrollView } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
-import { FormControl, Center, Box, Heading, VStack, Button, Spinner } from 'native-base';
+import { FormControl, Center, Box, Heading, VStack, Button } from 'native-base';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { API_BASEURL } from '@env';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { EssentialValues } from "../_layout";
 import { Picker } from '@react-native-picker/picker';
+import Loader from '@/components/ui/Loader';
 
 export default function Allotment() {
   const params = useLocalSearchParams();
@@ -34,7 +35,9 @@ export default function Allotment() {
         ...allotment,
         allotmentOfficer: data._id
       }
-      const allot = await axios.post(`http://147.79.70.8:3030/api/allotment/${bookingData._id}`, newAllotment);
+      const allot = await axios.post(`${API_BASEURL}/api/allotment/${bookingData._id}`, newAllotment, {
+        headers: { Authorization: data.token }
+      });
       Toast.show({ type: 'success', text1: allot?.data?.message });
       setAllotment({ allotmentOfficer: '', driver: '', vehicle: '' });
       updateBooking();
@@ -52,7 +55,7 @@ export default function Allotment() {
         ...allotment
       };
 
-      const update = await axios.put(`http://147.79.70.8:3030/api/allotment/${bookingData._id}`, updatedDetails, {
+      const update = await axios.put(`${API_BASEURL}/api/allotment/${bookingData._id}`, updatedDetails, {
         headers: { Authorization: data.token || '' },
       });
       Toast.show({ type: 'success', text1: 'Success', text2: update?.data?.message });
@@ -67,7 +70,9 @@ export default function Allotment() {
 
   async function fetchVehicles() {
     try {
-      const res = await axios.get(`http://147.79.70.8:3030/api/vehicle`);
+      const res = await axios.get(`${API_BASEURL}/api/vehicle`, {
+        headers: { Authorization: data.token }
+      });
       setVehicles(res.data);
     } catch (error) {
       setVehicles([]);
@@ -77,9 +82,13 @@ export default function Allotment() {
   async function fetchEmps() {
     // setIsLoading(true);
     try {
-      const emps = await axios.get(`http://147.79.70.8:3030/api/auth`);
+      const emps = await axios.get(`${API_BASEURL}/api/auth`, {
+        headers: {
+          Authorization: data.token || ""
+        }
+      });
       setDrivers(emps.data.filter((emp) => emp.account === 4));
-      setEmployees(emps.data.filter((emp)=>[1, 3].includes(emp.account)))
+      setEmployees(emps.data.filter((emp) => [1, 3].includes(emp.account)))
     } catch (error) {
       Toast.show({ type: 'error', text1: error.response.data.message });
     }
@@ -101,7 +110,9 @@ export default function Allotment() {
   useEffect(() => {
     async function fetchAllotment() {
       try {
-        const allotedDatails = await axios.get(`http://147.79.70.8:3030/api/allotment/${params._id}`);
+        const allotedDatails = await axios.get(`${API_BASEURL}/api/allotment/${params._id}`, {
+          headers: { Authorization: data.token }
+        });
         setAllotment(allotedDatails.data);
       } catch (error) {
         Toast.show({ type: 'info', text1: 'Fill up below details', text2: error.response.data.error });
@@ -116,7 +127,7 @@ export default function Allotment() {
   return (
     <ScrollView>
       {isLoading ? (
-        <Spinner size="large" color="blue" />
+        <Loader size="large" color="blue" />
       ) : (
         <Center w="100%">
           <Box safeArea p="2" w="90%" maxW="290" py="8">
@@ -153,7 +164,7 @@ export default function Allotment() {
                 </Picker>
               </FormControl>
               <Button mt="2" colorScheme="indigo" onPress={allotment?._id && ['1', '3'].includes(data.account) ? updateAllotment : addAllotment}>
-                {isWokringApi ? <Spinner color={"white"} /> : allotment?._id && ['1', '3'].includes(data.account) ? 'Update Allotment' : 'Allot Now'}
+                {isWokringApi ? <Loader color={"white"} /> : allotment?._id && ['1', '3'].includes(data.account) ? 'Update Allotment' : 'Allot Now'}
               </Button>
             </VStack>
           </Box>

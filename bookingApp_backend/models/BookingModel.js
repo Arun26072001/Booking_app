@@ -28,6 +28,8 @@ const bookingSchema = new mongoose.Schema({
 const Booking = mongoose.model("Booking", bookingSchema);
 
 const bookingValidation = Joi.object().keys({
+    _id: Joi.string().optional(),
+    __v: Joi.number().optional(),
     customerName: Joi.string().required("Customer name is required"),
     customerContact: Joi.string().regex(/^[0-9]{10}$/).messages({ 'string.pattern.base': `Customer Contact must have 10 digits.` }).required("Customer Contact is Required"), // Numeric contact
     pickupLocation: Joi.string().required("Please enter Pickup Location"),

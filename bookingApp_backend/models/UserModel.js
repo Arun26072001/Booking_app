@@ -13,6 +13,8 @@ const empSchema = new mongoose.Schema({
 const Employee = mongoose.model("employee", empSchema);
 
 const empValidation = Joi.object({
+    _id: Joi.string().optional(),
+    __v: Joi.number().optional(),
     name: Joi.string().trim().required().label("Name"),
     email: Joi.string().trim().required().label("Email Address"),
     password: Joi.string().min(4).required().label("Password"),

@@ -7,9 +7,9 @@ async function addVehicle(req, res) {
         if (error) {
             res.status(403).send({ error: error.message.replace(/["\\]/g, '') })
         } else {
-            const isVehicle = await Vehicle.find({ name: req.body.name });
+            const isVehicle = await Vehicle.find({ vehicleNo: req.body.vehicleNo });
             if (isVehicle.length > 0) {
-                res.status(400).send({ error: `Already has this ${req.body.name} taxi` })
+                res.status(400).send({ error: `Already has this ${req.body.vehicleNo} taxi` })
             } else {
                 const addingVehicle = await Vehicle.create(req.body);
                 res.send({ message: `New ${addingVehicle.name} taxi added` })
@@ -44,7 +44,7 @@ async function updateVehicle(req, res) {
 
 async function getVehicleById(req, res) {
     try {
-        const vehicle = await Vehicle.findOne({name: req.params.name});
+        const vehicle = await Vehicle.findOne({vehicleNo: req.params.name});
         if (!vehicle) {
             return res.status(404).send({ error: "vehicle not found" })
         } else {

@@ -3,7 +3,7 @@ const { Employee, empValidation } = require("../models/UserModel");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
-exports.addEmployee = async (req, res, next) => {
+exports.addEmployee = async (req, res) => {
     try {
         const newEmp = {
             name: req.body.name,
@@ -14,7 +14,7 @@ exports.addEmployee = async (req, res, next) => {
             account: req.body.work === "Taxi Alloter" ? 3 :
                 req.body.work === "Driver" ? 4 :
                     req.body.work === "Booking Officer" ? 2 :
-                        req.body.work === "admin" ? 1 : null
+                        req.body.work === "admin" ? 1 : 5
         }
 
         const validation = empValidation.validate(newEmp);
@@ -22,8 +22,10 @@ exports.addEmployee = async (req, res, next) => {
         if (error) {
             res.status(400).send({ error: error.message?.replace(/["\\]/g, '') });
         } else {
-            const isEmpEmail = await Employee.find({ email: newEmp.email });
-            const isEmpPhone = await Employee.find({ contact: newEmp.contact })
+            const [isEmpEmail, isEmpPhone] = await Promise.all([
+                Employee.find({ email: newEmp.email }),
+                Employee.find({ contact: newEmp.contact })])
+
             if (isEmpEmail.length > 0) {
                 return res.status(400).send({ error: "Email already exist!" })
             }
@@ -121,6 +123,20 @@ exports.addEmployee = async (req, res, next) => {
     }
 }
 
+exports.getEmployeeData = async (req, res) => {
+    try {
+        const emp = await Employee.findOne({ email: req.params.email }).exec();
+        if (!emp) {
+            return res.status(404).send({ error: "employee not found" })
+        } else {
+            return res.send(emp)
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: error.message })
+    }
+}
+
 exports.getEmployees = async (req, res) => {
     try {
         const emps = await Employee.find({}).exec();
@@ -157,6 +173,35 @@ exports.loginUser = async (req, res) => {
     }
 }
 
+exports.updateEmployee = async (req, res) => {
+    try {
+        const { error } = empValidation.validate(req.body);
+        if (error) {
+            return res.status(400).send({ error: error.details[0].message })
+        } else {
+            const [isEmpEmail, isEmpPhone] = await Promise.all([
+                Employee.find({ email: req.body.email }),
+                Employee.find({ contact: req.body.contact })])
+
+            if (isEmpEmail.length > 0) {
+                return res.status(400).send({ error: "Email already exist!" })
+            }
+            else if (isEmpPhone.length > 0) {
+                return res.status(400).send({ error: "Contact already exist!" })
+            }
+
+            const updatedData = {
+                ...req.body,
+                account: req.body.work === "Admin" ? 1 : req.body.work === "Booking Officer" ? 2 : req.body.work === "Taxi Allotor" ? 3 : req.body.work === "Driver" ? 4 : 5
+            }
+            const updatedEmp = await Employee.findByIdAndUpdate(req.params.id, updatedData, { new: true })
+            return res.send({ message: `${req.body.name} data updated successfully`, updatedEmp })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: error.message })
+    }
+}
 exports.logoutUser = async (req, res) => {
     if (req.headers['authorization']) {
         req.headers.remove('authorization')
