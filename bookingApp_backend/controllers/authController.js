@@ -20,7 +20,7 @@ exports.addEmployee = async (req, res) => {
         const validation = empValidation.validate(newEmp);
         const { error } = validation;
         if (error) {
-            res.status(400).send({ error: error.message?.replace(/["\\]/g, '') });
+            res.status(400).send({ error: error.details[0].message });
         } else {
             const [isEmpEmail, isEmpPhone] = await Promise.all([
                 Employee.find({ email: newEmp.email }),
