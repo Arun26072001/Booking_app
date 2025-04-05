@@ -1,33 +1,30 @@
-const dotenv = require('dotenv');
 const fs = require('fs');
 const https = require('https');
+const dotenv = require('dotenv');
 const { DBConncetion } = require('./config/DatabaseConnection');
+const app = require('./app');
 
 // Load environment variables
 dotenv.config({ path: "./config/config.env" });
 
 const port = process.env.PORT || 3030;
-const app = require('./app'); // your actual Express app with all routes and middleware
 
-// Connect to database
+// Connect to DB
 DBConncetion();
 
-// SSL Cert paths
+// ✅ Use Linux-style paths (for Ubuntu or any live Linux server)
 const options = {
   key: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/privkey.pem'),
   cert: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/fullchain.pem')
 };
 
-// Start HTTPS server
+// Create HTTPS server
 const server = https.createServer(options, app).listen(port, () => {
   console.log(`${process.env.NODE_ENV} is running securely on https://rbcstories.in:${port}`);
 });
 
-// Handle unhandled promise rejections
+// Handle promise rejections
 process.on("unhandledRejection", (err) => {
-  console.log(`Something went wrong: ${err.message}`);
-  console.log("App is shutting down...");
-  server.close(() => {
-    process.exit(1);
-  });
+  console.log(`Error: ${err.message}`);
+  server.close(() => process.exit(1));
 });
