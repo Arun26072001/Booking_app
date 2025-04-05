@@ -17,6 +17,8 @@ const port = process.env.PORT || 3030;
 let options = {};
 
 if (process.env.NODE_ENV === 'production') {
+    console.log("yes");
+    
   options = {
     key: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/privkey.pem'),
     cert: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/fullchain.pem')
