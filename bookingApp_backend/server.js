@@ -7,24 +7,32 @@ const app = require('./app');
 // Load environment variables
 dotenv.config({ path: "./config/config.env" });
 
-const port = process.env.PORT || 3030;
-
-// Connect to DB
+// Connect to database
 DBConncetion();
 
-// ✅ Use Linux-style paths (for Ubuntu or any live Linux server)
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/fullchain.pem')
-};
+// Port from env or fallback
+const port = process.env.PORT || 3030;
 
-// Create HTTPS server
-const server = https.createServer(options, app).listen(port, () => {
-  console.log(`${process.env.NODE_ENV} is running securely on https://rbcstories.in:${port}`);
-});
+// 🛡️ HTTPS in production, HTTP in development
+let options = {};
 
-// Handle promise rejections
+if (process.env.NODE_ENV === 'production') {
+  options = {
+    key: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/rbcstories.in/fullchain.pem')
+  };
+
+  https.createServer(options, app).listen(port, () => {
+    console.log(`✅ Production server running on HTTPS at port ${port}`);
+  });
+} else {
+  app.listen(port, () => {
+    console.log(`🚀 Dev server running on HTTP at port ${port}`);
+  });
+}
+
+// 🔥 Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
-  console.log(`Error: ${err.message}`);
-  server.close(() => process.exit(1));
+  console.log(`❌ Unhandled Rejection: ${err.message}`);
+  process.exit(1);
 });
