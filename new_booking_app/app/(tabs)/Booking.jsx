@@ -39,7 +39,6 @@ export default function Booking() {
     function handlePickupChange(event, value) {
         if (show === "pickupDate") {
             const datevalue = `${new Date(value).getFullYear()}-${new Date(value).getMonth() + 1}-${new Date(value).getDate()}`;
-            console.log(datevalue);
             setPickupDate(datevalue)
             setShow("")
         } else {
@@ -303,7 +302,7 @@ export default function Booking() {
                                     <Picker.Item label='Select Vehicle Type' />
                                     {
                                         vehicles?.map((vehicle) => {
-                                            return <Picker.Item key={vehicle._id} label={vehicle.name} value={vehicle._id} />
+                                            return <Picker.Item key={vehicle._id} label={vehicle.name + " " + (vehicle.capacity-1 + "+1")} value={vehicle._id} />
                                         })
                                     }
                                 </Picker>

@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { Box, Heading, VStack, FormControl, Input, Button, HStack, Stack, Center } from "native-base";
+import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { Box, Heading, VStack, FormControl, Input, Button, HStack, Center } from "native-base";
 import axios from 'axios';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { EssentialValues } from "../_layout";
 import Toast from 'react-native-toast-message';
 import { API_BASEURL } from "@env";
@@ -22,6 +23,7 @@ export default function Vehicle() {
     const [isWorkingApi, setIsWorkingApi] = useState(false);
     const [isChangeVehicle, setIsChangevehicle] = useState(false);
     const [vehicleName, setVehicleName] = useState('');
+    const [show, setShow] = useState(null);
     const tableHead = ['Name', 'PerKm', 'PerDay', 'Capacity', 'VehicleNo', "Action"];
     const columnWidths = [120, 80, 80, 100, 150, 80];
     const [filteredVehicles, setFilteredVehicles] = useState([]);
@@ -33,6 +35,25 @@ export default function Vehicle() {
         }));
     }
 
+    function handleDateValue(event, value, name) {
+        console.log(event, value, name);
+
+        if (show === "FC") {
+            const datevalue = `${new Date(value).getFullYear()}-${new Date(value).getMonth() + 1}-${new Date(value).getDate()}`;
+            setVehicle((pre) => ({
+                ...pre,
+                [name]: datevalue
+            }));
+            setShow("")
+        } else {
+            const datevalue = `${new Date(value).getFullYear()}-${new Date(value).getMonth() + 1}-${new Date(value).getDate()}`;
+            setVehicle((pre) => ({
+                ...pre,
+                [name]: datevalue
+            }));
+            setShow("")
+        }
+    }
 
     // add vehicle
     async function addVehicle() {
@@ -114,7 +135,7 @@ export default function Vehicle() {
                 </Text>
             ]))
         } catch (error) {
-            console.log("error in fetch vehicles", error);
+            console.log("error in fetch vehicles", error.response.data.error);
         } finally {
             setIsLoading(false)
         }
@@ -170,61 +191,123 @@ export default function Vehicle() {
 
     return (
         isChangeVehicle ?
-            <Center>
-                <Box safeArea p="2" py="2" w="90%" maxW="290">
-                    <Heading size="lg" fontWeight="600" color="coolGray.800">
-                        {vehicle._id ? "Edit" : "New"} Vehicle Details
-                    </Heading>
-                    <VStack space={3} mt="5">
-                        <FormControl>
-                            <FormControl.Label>Vehicle Name</FormControl.Label>
-                            <Input
-                                value={vehicle?.name || ""}
-                                onChangeText={(value) => addVehicleObj(value, "name")}
-                            />
-                        </FormControl>
-                        <FormControl>
-                            <FormControl.Label>Vehicle Per/Km</FormControl.Label>
-                            <Input
-                                keyboardType='numeric'
-                                value={vehicle?.perKm ? String(vehicle?.perKm) : ""}
-                                onChangeText={(value) => addVehicleObj(value, "perKm")}
-                            />
-                        </FormControl>
-                        <FormControl>
-                            <FormControl.Label>Vehicle Per/Day</FormControl.Label>
-                            <Input
-                                keyboardType='numeric'
-                                value={vehicle?.perDay ? String(vehicle?.perDay) : ""}
-                                onChangeText={(value) => addVehicleObj(value, "perDay")}
-                            />
-                        </FormControl>
-                        <FormControl>
-                            <FormControl.Label>Vehicle Capacity</FormControl.Label>
-                            <Input
-                                keyboardType='numeric'
-                                value={vehicle?.capacity ? String(vehicle?.capacity) : ""}
-                                onChangeText={(value) => addVehicleObj(value, "capacity")}
-                            />
-                        </FormControl>
-                        <FormControl>
-                            <FormControl.Label>Vehicle Number</FormControl.Label>
-                            <Input
-                                value={vehicle?.vehicleNo ? String(vehicle?.vehicleNo) : ""}
-                                onChangeText={(value) => addVehicleObj(value, "vehicleNo")}
-                            />
-                        </FormControl>
-                        <HStack style={{ justifyContent: "space-around" }}>
-                            <Button variant={"outline"} onPress={handleChangeVehicle}>
-                                Cancel
-                            </Button>
-                            <Button onPress={vehicle._id ? editVehicle : addVehicle}>
-                                {isWorkingApi ? <Loader color={"white"} /> : "Add Vehicle"}
-                            </Button>
-                        </HStack>
-                    </VStack>
-                </Box>
-            </Center> :
+            <ScrollView>
+                <Center>
+                    <Box safeArea p="2" py="2" w="90%" maxW="290">
+                        <Heading size="lg" fontWeight="600" color="coolGray.800">
+                            {vehicle._id ? "Edit" : "New"} Vehicle Details
+                        </Heading>
+                        <VStack space={3} mt="5">
+                            <FormControl>
+                                <FormControl.Label>Vehicle Name</FormControl.Label>
+                                <Input
+                                    value={vehicle?.name || ""}
+                                    onChangeText={(value) => addVehicleObj(value, "name")}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Vehicle Type</FormControl.Label>
+                                <Input
+                                    value={vehicle?.type || ""}
+                                    onChangeText={(value) => addVehicleObj(value, "type")}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Vehicle Model</FormControl.Label>
+                                <Input
+                                    value={vehicle?.vehicleModel || ""}
+                                    onChangeText={(value) => addVehicleObj(value, "vehicleModel")}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Fitness certificate Expire Date</FormControl.Label>
+                                {/* <Input
+                                    value={vehicle?.FCExpireDate || ""}
+                                    onChangeText={(value) => addVehicleObj(value, "FCExpireDate")}
+                                /> */}
+                                <Input
+                                    size="xl"
+                                    style={[styles.input, { borderWidth: 0 }]}
+                                    value={vehicle?.FCExpireDate}
+                                    onFocus={() => setShow("FC")}
+                                />
+                                {show === "FC" &&
+                                    <DateTimePicker
+                                        value={new Date()}
+                                        mode="date"
+                                        minimumDate={new Date()}
+                                        display="default"
+                                        onChange={(event, date) => handleDateValue(event, date, "FCExpireDate")}
+                                    />
+                                }
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Insurance Expire Date</FormControl.Label>
+                                {/* <Input
+                                    value={vehicle?.insuranceExpireDate || ""}
+                                    onChangeText={(value) => addVehicleObj(value, "insuranceExpireDate")}
+                                /> */}
+                                <Input
+                                    size="xl"
+                                    style={[styles.input, { borderWidth: 0 }]}
+                                    value={vehicle?.insuranceExpireDate}
+                                    onFocus={() => setShow("insurance")}
+                                />
+                                {
+                                    show === "insurance" &&
+                                    <DateTimePicker
+                                        value={new Date()}
+                                        mode="date"
+                                        minimumDate={new Date()}
+                                        display="default"
+                                        onChange={(event, date) => handleDateValue(event, date, "insuranceExpireDate")}
+                                    />
+                                }
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Vehicle Per/Km</FormControl.Label>
+                                <Input
+                                    keyboardType='numeric'
+                                    value={vehicle?.perKm ? String(vehicle?.perKm) : ""}
+                                    onChangeText={(value) => addVehicleObj(value, "perKm")}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Vehicle Per/Day</FormControl.Label>
+                                <Input
+                                    keyboardType='numeric'
+                                    value={vehicle?.perDay ? String(vehicle?.perDay) : ""}
+                                    onChangeText={(value) => addVehicleObj(value, "perDay")}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Vehicle Capacity</FormControl.Label>
+                                <Input
+                                    keyboardType='numeric'
+                                    value={vehicle?.capacity ? String(vehicle?.capacity) : ""}
+                                    onChangeText={(value) => addVehicleObj(value, "capacity")}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <FormControl.Label>Vehicle Number</FormControl.Label>
+                                <Input
+                                    value={vehicle?.vehicleNo ? String(vehicle?.vehicleNo) : ""}
+                                    onChangeText={(value) => addVehicleObj(value, "vehicleNo")}
+                                />
+                            </FormControl>
+                            <HStack style={{ justifyContent: "space-around" }}>
+                                <Button variant={"outline"} onPress={handleChangeVehicle}>
+                                    Cancel
+                                </Button>
+                                <Button onPress={vehicle._id ? editVehicle : addVehicle}>
+                                    {isWorkingApi ? <Loader color={"white"} /> : "Add Vehicle"}
+                                </Button>
+                            </HStack>
+                        </VStack>
+                    </Box>
+                </Center>
+            </ScrollView>
+            :
             <View style={{ flex: 1 }}>
                 <Input
                     placeholder="Search by any field..."

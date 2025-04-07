@@ -49,38 +49,38 @@ export default function TripCompleted() {
     setIsWorkingApi(false);
   }
 
-  async function updateCompletedTrip() {
-    setIsWorkingApi(true);
-    try {
-      const updatedTripDetails = {
-        bookingId: _id,
-        ...tripDetails
-      };
+  // async function updateCompletedTrip() {
+  //   setIsWorkingApi(true);
+  //   try {
+  //     const updatedTripDetails = {
+  //       bookingId: _id,
+  //       ...tripDetails
+  //     };
 
-      const response = await axios.put(`${API_BASEURL}/api/trip-complete/${_id}`, updatedTripDetails, {
-        headers: {
-          Authorization: data.token || "",
-        },
-      });
+  //     const response = await axios.put(`${API_BASEURL}/api/trip-complete/${_id}`, updatedTripDetails, {
+  //       headers: {
+  //         Authorization: data.token || "",
+  //       },
+  //     });
 
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: response.data.message,
-      });
+  //     Toast.show({
+  //       type: "success",
+  //       text1: "Success",
+  //       text2: response.data.message,
+  //     });
 
-      setTripDetails({});
-      setFiles([]);
-      router.replace("/Home");
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Failed",
-        text2: error?.response?.data?.error || "Something went wrong",
-      });
-    }
-    setIsWorkingApi(false);
-  }
+  //     setTripDetails({});
+  //     setFiles([]);
+  //     router.replace("/Home");
+  //   } catch (error) {
+  //     Toast.show({
+  //       type: "error",
+  //       text1: "Failed",
+  //       text2: error?.response?.data?.error || "Something went wrong",
+  //     });
+  //   }
+  //   setIsWorkingApi(false);
+  // }
 
   function updateTripDetails(value, name) {
     setTripDetails((prev) => ({ ...prev, [name]: value }));

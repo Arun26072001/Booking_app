@@ -56,8 +56,10 @@ async function getAllBookings(req, res) {
                 path: "vehicle"
             }]
         }).populate({ path: "vehicleType" });
+        if (!bookings.length) {
+            return res.status(200).send([]);
+        }
         bookings = bookings.sort((a, b) => new Date(b.pickupDateTime) - new Date(a.pickupDateTime))
-
         res.send(bookings);
     } catch (error) {
         console.log(error);
@@ -130,18 +132,14 @@ async function getBookingByMail(req, res) {
 async function getDriverBookings(req, res) {
     try {
         // Fetch all bookings for the driver
-        let driverTrips = await Booking.find()
+        let trips = await Booking.find()
             .populate({
                 path: "allotment"
             })
             .populate("vehicleType") // Populate vehicleType
             .exec();
 
-        driverTrips = driverTrips.filter((trip) => {
-            const driverId = trip.allotment?.driver;
-            const paramId = req.params.id;
-            return driverId && new ObjectId(driverId).equals(paramId);
-        })
+        const driverTrips = trips.filter((trip) => String(trip?.allotment?.driver)?.includes(req.params.id))
 
         // Filter and sort trips if there are any
         if (driverTrips.length > 0) {
@@ -161,7 +159,7 @@ async function getDriverBookings(req, res) {
 
 async function getAllotorTrips(req, res) {
     try {
-        let driverTrips = await Booking.find()
+        let trips = await Booking.find()
             .populate({
                 path: "allotment",
                 // match: { allotmentOfficer: { $in: req.params.id } }
@@ -169,9 +167,10 @@ async function getAllotorTrips(req, res) {
             .populate({ path: "vehicleType" })
             .exec();
 
-        if (driverTrips.length > 0) {
-            driverTrips = driverTrips.sort((a, b) => new Date(b.pickupDateTime) - new Date(a.pickupDateTime))
-            return res.send(driverTrips);
+        if (trips.length > 0) {
+            const filteredTrips = trips.filter((trip) => String(trip?.allotment?.allotmentOfficer)?.includes(req.params.id))
+            trips = filteredTrips.sort((a, b) => new Date(b.pickupDateTime) - new Date(a.pickupDateTime))
+            return res.send(trips);
         } else {
             return res.status(404).send({ error: "Sorry, No Trips assign for you!" })
         }

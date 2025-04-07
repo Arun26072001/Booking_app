@@ -47,8 +47,10 @@ export default function BookingHistory() {
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
+        }finally{
+            
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     async function getDriverBookings() {
@@ -60,8 +62,10 @@ export default function BookingHistory() {
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
+        }finally{
+            
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     useEffect(() => {
@@ -79,8 +83,10 @@ export default function BookingHistory() {
                 }
             } catch (error) {
                 setErrorMsg(error?.response?.data?.error);
+            }finally{
+            
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         if (["1", "2"].includes(account)) {
             getBookings();

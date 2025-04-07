@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { useContext } from "react";
 import { EssentialValues } from "../_layout";
-import { Platform, TouchableHighlight, StyleSheet } from "react-native";
+import { Platform, TouchableHighlight, StyleSheet, TouchableOpacity } from "react-native";
 
 // icons font-family
 import Entypo from '@expo/vector-icons/Entypo';
@@ -45,10 +45,23 @@ export default function TabsLayout() {
       {data?.account && ["1", "4"].includes(data.account) && (
         <Tabs.Screen
           name="TripCompleted"
-          options={{
+          options={({ route }) => ({
             title: "Trip Completed",
-            tabBarIcon: ({ color }) => <AntDesign name="checkcircle" size={24} color={color} />,
-          }}
+            tabBarIcon: ({ color }) => (
+              <AntDesign name="checkcircle" size={24} color={color} />
+            ),
+            tabBarButton: (props) => {
+              // Get params from the current route if needed
+              const id = route?.params?.id;
+              const isDisabled = !id;
+
+              return (
+                <TouchableOpacity {...props} disabled={isDisabled} style={{ opacity: isDisabled ? 0.4 : 1, alignItems: "center" }}>
+                  {props.children}
+                </TouchableOpacity>
+              );
+            },
+          })}
         />
       )}
 

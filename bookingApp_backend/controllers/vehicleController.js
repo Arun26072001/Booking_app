@@ -7,8 +7,8 @@ async function addVehicle(req, res) {
         if (error) {
             res.status(403).send({ error: error.message.replace(/["\\]/g, '') })
         } else {
-            const isVehicle = await Vehicle.find({ vehicleNo: req.body.vehicleNo });
-            if (isVehicle.length > 0) {
+            // const isVehicle = await Vehicle.find({ vehicleNo: req.body.vehicleNo });
+            if (await Vehicle.exists({ vehicleNo: req.body.vehicleNo })) {
                 res.status(400).send({ error: `Already has this ${req.body.vehicleNo} taxi` })
             } else {
                 const addingVehicle = await Vehicle.create(req.body);

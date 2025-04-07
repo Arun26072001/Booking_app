@@ -48,8 +48,9 @@ export default function Customers() {
           text1: 'Failed',
           text2: error.response?.data?.error || 'An unexpected error occurred',
         });
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     fetchCustomers();

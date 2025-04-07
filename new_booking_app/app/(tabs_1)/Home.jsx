@@ -34,8 +34,10 @@ export default function Home() {
             setBookings(trips.data.filter((data) => data.tripCompleted === false));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
+        }finally{
+            
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
     async function fetchAllertedBooking() {
         try {
@@ -69,8 +71,10 @@ export default function Home() {
             console.log(error);
 
             setErrorMsg(error?.response?.data?.error);
+        }finally{
+            
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     async function getDriverBookings() {
@@ -83,8 +87,10 @@ export default function Home() {
         } catch (error) {
             console.log("Error in fetch driver bookings", error);
             setErrorMsg(error?.response?.data?.error)
+        }finally{
+            
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     useEffect(() => {

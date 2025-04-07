@@ -20,7 +20,6 @@ export default function Allotment() {
   const [bookingData, setBookingData] = useState({});
   const [allotment, setAllotment] = useState({});
   const [isWokringApi, setIsWorkingApi] = useState(false);
-  console.log(params);
 
   function fillAllotmentForm(value, name) {
     setAllotment((prev) => ({
@@ -32,11 +31,15 @@ export default function Allotment() {
   const addAllotment = async () => {
     setIsWorkingApi(true);
     try {
-      const allot = await axios.post(`${API_BASEURL}/api/allotment/${bookingData._id}`, allotment, {
+      const newAllotment = {
+        ...allotment,
+        allotmentOfficer: data._id
+      }
+      const allot = await axios.post(`${API_BASEURL}/api/allotment/${bookingData._id}`, newAllotment, {
         headers: { Authorization: data.token }
       });
       Toast.show({ type: 'success', text1: allot?.data?.message });
-      setAllotment({ allotmentOfficer: '', driver: '', vehicle: '' });
+      setAllotment({});
       updateBooking();
       router.push('/Home');
     } catch (error) {
@@ -88,38 +91,65 @@ export default function Allotment() {
       setEmployees(emps.data);
     } catch (error) {
       Toast.show({ type: 'error', text1: error.response.data.message });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   useEffect(() => {
-    if (params._id) {
-      setBookingData(params);
-    } else {
-      router.push("/Home")
-      Toast.show({ type: 'info', text1: 'Warning', text2: "You can allot only for selected trip" });
-    }
+    const initialize = async () => {
+      if (!params?._id) {
+        Toast.show({
+          type: "info",
+          text1: "Warning",
+          text2: "You can allot only for selected trip",
+        });
+        router.push("/Home");
+        return;
+      }
 
-    fetchVehicles();
-    fetchEmps();
+      setBookingData(params);
+      setIsLoading(true);
+      try {
+        await Promise.all([fetchVehicles(), fetchEmps()]);
+      } catch (err) {
+        Toast.show({
+          type: "error",
+          text1: "Initialization Failed",
+          text2: "Check your network or try again",
+        });
+      } finally {
+        setIsLoading(false); // ✅ End loading state
+      }
+    };
+
+    initialize();
   }, []);
 
+  // ✅ Fetch allotment only when needed
   useEffect(() => {
-    async function fetchAllotment() {
+    const fetchAllotment = async () => {
       try {
-        const allotedDatails = await axios.get(`${API_BASEURL}/api/allotment/${params._id}`, {
-          headers: { Authorization: data.token }
+        const res = await axios.get(`${API_BASEURL}/api/allotment/${params._id}`, {
+          headers: { Authorization: data.token },
         });
-        setAllotment(allotedDatails.data);
+        setAllotment(res.data);
       } catch (error) {
-        Toast.show({ type: 'info', text1: 'Fill up below details', text2: error.response.data.error });
+        Toast.show({
+          type: "info",
+          text1: "Fill up below details",
+          text2: error?.response?.data?.error || "Error fetching allotment",
+        });
       }
-    }
+    };
 
-    if (['1', '3'].includes(data.account)) {
+    if (['1', '3'].includes(data.account) && params?._id) {
       fetchAllotment();
     }
-  }, []);
+  }, [params?._id]);
+  console.log(drivers);
+  console.log(allotment);
+
 
   return (
     <ScrollView>
@@ -135,7 +165,7 @@ export default function Allotment() {
             <VStack space={3} mt="5">
               <FormControl>
                 <FormControl.Label>Allotment Officer</FormControl.Label>
-                <Picker selectedValue={allotment?.allotmentOfficer} onValueChange={(value) => fillAllotmentForm(value, 'allotmentOfficer')}>
+                <Picker selectedValue={allotment?.allotmentOfficer || data._id} onValueChange={(value) => fillAllotmentForm(value, 'allotmentOfficer')}>
                   <Picker.Item label="Select Allotment Office" />
                   {employees.map((emp) => (
                     <Picker.Item key={emp._id} label={emp.name} value={emp._id} />

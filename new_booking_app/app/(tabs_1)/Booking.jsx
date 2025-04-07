@@ -47,7 +47,6 @@ export default function Booking() {
             setPickupTime(timeValue)
             setShow("")
         }
-
     }
 
     function handleDropChange(event, value) {

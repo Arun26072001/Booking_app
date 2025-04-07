@@ -179,16 +179,16 @@ exports.updateEmployee = async (req, res) => {
         if (error) {
             return res.status(400).send({ error: error.details[0].message })
         } else {
-            const [isEmpEmail, isEmpPhone] = await Promise.all([
-                Employee.find({ email: req.body.email }),
-                Employee.find({ contact: req.body.contact })])
+            // const [isEmpEmail, isEmpPhone] = await Promise.all([
+            //     Employee.find({ email: req.body.email }),
+            //     Employee.find({ contact: req.body.contact })])
 
-            if (isEmpEmail.length > 0) {
-                return res.status(400).send({ error: "Email already exist!" })
-            }
-            else if (isEmpPhone.length > 0) {
-                return res.status(400).send({ error: "Contact already exist!" })
-            }
+            // if (isEmpEmail.length > 0) {
+            //     return res.status(400).send({ error: "Email already exist!" })
+            // }
+            // else if (isEmpPhone.length > 0) {
+            //     return res.status(400).send({ error: "Contact already exist!" })
+            // }
 
             const updatedData = {
                 ...req.body,

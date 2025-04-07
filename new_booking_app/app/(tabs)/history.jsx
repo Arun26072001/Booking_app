@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
 import axios from "axios";
 import NoFound from "../../components/ui/NoFound";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -48,8 +48,9 @@ export default function BookingHistory() {
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     async function getDriverBookings() {
@@ -61,8 +62,9 @@ export default function BookingHistory() {
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
+        }finally{
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     useEffect(() => {
@@ -80,8 +82,10 @@ export default function BookingHistory() {
                 }
             } catch (error) {
                 setErrorMsg(error?.response?.data?.error);
+            }finally{
+                setIsLoading(false);
+            
             }
-            setIsLoading(false);
         };
         if (["1", "2"].includes(account)) {
             getBookings();

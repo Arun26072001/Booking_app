@@ -42,7 +42,6 @@ export default function RootLayout() {
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_BASEURL}/api/auth/login`, credentials);
-
       const decodedData = jwtDecode(response.data); // ✅ Fixed
       const { name, email, account, _id } = decodedData;
 

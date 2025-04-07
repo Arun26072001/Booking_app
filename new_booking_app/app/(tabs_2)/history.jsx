@@ -50,8 +50,10 @@ export default function BookingHistory() {
             setBookings(trips.data.filter((data) => data.tripCompleted === true));
         } catch (error) {
             setErrorMsg(error?.response?.data?.error);
+        }finally{
+            
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     async function getDriverBookings() {
